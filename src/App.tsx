@@ -9,7 +9,7 @@ const AccountSetup = lazy(() => import("./pages/entity/AccountSetup"));
 const Dashboard = lazy(() => import("./pages/protected/dashboard"));
 const Events = lazy(() => import("./pages/protected/event"));
 const Index = lazy(() => import("./pages"));
-// const NotFound = lazy(() => import("./pages/error/404"));
+const NotFound = lazy(() => import("./pages/error/404"));
 // const Placement = lazy(() => import("./pages/placement/placement"));
 const ProfileSetup = lazy(() => import("./pages/entity/ProfileSetup"));
 const Settings = lazy(() => import("./pages/protected/settings"));
@@ -39,6 +39,7 @@ function App() {
           {"/* Authorized users can only access these routes */"}
           <Route element={<AuthLayout />}>
             <Route path="/profile-setup" element={<Page element={ProfileSetup} />} />
+            <Route path="/entity-setup" element={<Page element={StudentRegistrationForm} />} />
 
             <Route element={<SideMenuLayout />}>
               <Route path="/dashboard" element={<Page element={Dashboard} />} />
@@ -46,15 +47,13 @@ function App() {
               {/* <Route path="/placement-drive" element={<Page element={Placement} />} /> */}
               {/* <Route path="/training-module" element={<Page element={Training} />} /> */}
               <Route path="/events" element={<Page element={Events} />} />
-              <Route path="/student" element={<Page element={StudentRegistrationForm} />} />
-
               <Route path="/settings" element={<Page element={Settings} />} />
               <Route path="/students/:id" element={<Page element={Student} />} />
             </Route>
           </Route>
 
           {"/* 404 route */"}
-          {/* <Route path="*" element={<Page element={NotFound} />} /> */}
+          <Route path="*" element={<Page element={NotFound} />} />
         </Routes>
 
       </AnimatePresence>

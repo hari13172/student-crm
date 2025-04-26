@@ -209,7 +209,7 @@ export default function AccountSetupPage() {
             window.location.href = import.meta.env.VITE_APP_AUTH_URL;
           }, 1000);
         },
-        onError(error: any) {
+        onError(error) {
           toast.error("Account setup failed", {
             description:
               error instanceof Error
@@ -301,7 +301,7 @@ export default function AccountSetupPage() {
         <Card className="w-full max-w-md">
           <CardContent>
             {inviteEmail && (
-              <Alert className="mb-6" variant={"success"}>
+              <Alert className="mb-6" variant={"default"}>
                 <CheckCircle className="h-4 w-4" />
                 <AlertTitle>Valid Invitation</AlertTitle>
                 <AlertDescription>
