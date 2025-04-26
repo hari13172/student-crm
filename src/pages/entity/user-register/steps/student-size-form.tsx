@@ -96,70 +96,6 @@ export function StudentSizeForm() {
           <h2 className="text-xl font-semibold">Student Education Details</h2>
         </div>
 
-        {/* Select What You Studied */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium">What have you studied?</h3>
-          <FormItem>
-            <FormControl>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    value="class_12"
-                    checked={whatStudied === "class_12"}
-                    onChange={() => setWhatStudied("class_12")}
-                  />
-                  Class 12th
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    value="diploma"
-                    checked={whatStudied === "diploma"}
-                    onChange={() => setWhatStudied("diploma")}
-                  />
-                  Diploma
-                </label>
-              </div>
-            </FormControl>
-          </FormItem>
-        </div>
-
-        {/* Select Post Graduation */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium">Post Graduation?</h3>
-          <FormField
-            control={control}
-            name="student_size.has_post_graduation"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        value="yes"
-                        checked={field.value === "yes"}
-                        onChange={() => field.onChange("yes")}
-                      />
-                      Yes
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        value="no"
-                        checked={field.value === "no"}
-                        onChange={() => field.onChange("no")}
-                      />
-                      No
-                    </label>
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-
         <Separator />
 
         {/* Dynamic Form Based on Levels */}
@@ -276,6 +212,74 @@ export function StudentSizeForm() {
                 label="Upload Marksheet"
                 accept=".pdf,.jpg,.jpeg,.png"
               />
+
+              {/* Show What Studied selection after Class 10th */}
+              {level === "class_10" && (
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">What have you studied?</h3>
+                  <FormItem>
+                    <FormControl>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            value="class_12"
+                            checked={whatStudied === "class_12"}
+                            onChange={() => setWhatStudied("class_12")}
+                          />
+                          Class 12th
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            value="diploma"
+                            checked={whatStudied === "diploma"}
+                            onChange={() => setWhatStudied("diploma")}
+                          />
+                          Diploma
+                        </label>
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                </div>
+              )}
+
+              {/* Show Post Graduation selection after Graduation */}
+              {level === "graduation" && (
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Post Graduation?</h3>
+                  <FormField
+                    control={control}
+                    name="student_size.has_post_graduation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="flex gap-4">
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                value="yes"
+                                checked={field.value === "yes"}
+                                onChange={() => field.onChange("yes")}
+                              />
+                              Yes
+                            </label>
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                value="no"
+                                checked={field.value === "no"}
+                                onChange={() => field.onChange("no")}
+                              />
+                              No
+                            </label>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
             </div>
           );
         })}
@@ -283,4 +287,3 @@ export function StudentSizeForm() {
     </Card>
   );
 }
-
