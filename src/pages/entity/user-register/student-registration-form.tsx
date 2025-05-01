@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { PhotosSignatureForm } from "./steps/student-signature";
 import { TermsAndConditionsForm } from "./steps/terms-and-conditions-form";
 import { api } from "@/components/api/fetcher";
-import { studentRegistrationSchema } from "./schema";
+import { generatePayload, studentRegistrationSchema } from "./schema";
 import { motion } from "motion/react";
 import { routes } from "@/components/api/route";
 import { toast } from "sonner";
@@ -22,14 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 type FormData = z.infer<typeof studentRegistrationSchema>;
 
-// const steps = [
-//   { id: 0, label: "Student Information" },
-//   { id: 1, label: "Student Persons" },
-//   { id: 2, label: "Student Size" },
-//   { id: 3, label: "Documents" },
-//   { id: 4, label: "Service Requirements" },
-//   { id: 5, label: "Terms & Conditions" },
-// ];
+
 
 const steps = [
   { id: 0, label: "Student Information" },
@@ -82,62 +75,53 @@ export function StudentRegistrationForm() {
         permanent_pin_code: "",
       },
       student_size: {
-        education_levels: [
-          {
-            level: "class_10",
-            year_of_passing: "",
-            class_10_total_mark: "",
-            percentage_or_cgpa: "",
-            school_institution: "",
-            board_university: "",
-            education_type: "full_time",
-            marksheet: null,
-          },
-          // Placeholder for Class 12th or Diploma
-          {
-            level: "class_12", // Default to Class 12th, will be updated based on user selection
-            year_of_passing: "",
-            percentage_or_cgpa: "",
-            group: "",
-            school_institution: "",
-            board_university: "",
-            education_type: "full_time",
-            marksheet: null,
-          },
-          {
-            level: "graduation",
-            year_of_passing: "",
-            percentage_or_cgpa: "",
-            program_degree: "",
-            branch: "",
-            school_institution: "",
-            board_university: "",
-            history_of_arrear: "",
-            current_arrear: "",
-            education_type: "full_time",
-            marksheet: null,
-          },
-          {
-            level: "post_graduation",
-            year_of_passing: "",
-            percentage_or_cgpa: "",
-            program_degree: "",
-            branch: "",
-            school_institution: "",
-            board_university: "",
-            history_of_arrear: "",
-            current_arrear: "",
-            education_type: "full_time",
-            marksheet: null,
-          },
-        ],
-        has_post_graduation: "no",
-      },
-      student_documents: {
-        accreditation_certificate: "",
-        affiliation_certificate: "",
-        proof_of_address: "",
-        logo: "",
+        education_details: {
+          class10_year: 0,
+          class10_marks: 0,
+          class10_percentage: 0,
+          class10_school: "",
+          class10_board: "CBSE",
+          class10_education_type: "FullTime",
+          class10_marksheet_path: "",
+          class12_studied: false,
+          class12_year: 0,
+          class12_marks: 0,
+          class12_percentage: 0,
+          class12_group: "",
+          class12_school: "",
+          class12_board: "CBSE",
+          class12_education_type: "FullTime",
+          class12_marksheet_path: "",
+          diploma_studied: false,
+          diploma_year: 0,
+          diploma_percentage: 0,
+          diploma_department: "",
+          diploma_college: "",
+          diploma_board: "CBSE",
+          diploma_education_type: "FullTime",
+          diploma_marksheet_path: "",
+          ug_year: 0,
+          ug_percentage_cgpa: 0,
+          ug_program: "",
+          ug_branch: "",
+          ug_college: "",
+          ug_university: "",
+          ug_arrear_history: "",
+          ug_current_arrear: "",
+          ug_education_type: "FullTime",
+          ug_marksheet_path: "",
+          pg_studied: false,
+          pg_year: 0,
+          pg_percentage: 0,
+          pg_program: "",
+          pg_branch: "",
+          pg_college: "",
+          pg_university: "",
+          pg_arrear_history: "",
+          pg_current_arrear: "",
+          pg_education_type: "FullTime",
+          pg_marksheet_path: "",
+        },
       },
       student_experience_skill: {
         experience: [{ has_experience: "no" }],
@@ -157,6 +141,7 @@ export function StudentRegistrationForm() {
   });
 
   const nextStep = async () => {
+    console.log(form.getValues());
     const fieldsToValidate = getFieldsToValidate(currentStep);
     const result = await form.trigger(fieldsToValidate as any);
 
@@ -175,7 +160,7 @@ export function StudentRegistrationForm() {
       }
     } else {
       console.log("Step--> else", currentStep, "is invalid");
-      console.log(result);
+      console.log(form.formState.errors);
     }
   };
 
@@ -204,36 +189,40 @@ export function StudentRegistrationForm() {
         return [];
     }
   };
-  const CollegePost = api.post(routes.colleges.add_entity);
+
+
+  const StudentPost = api.post(routes.students.add_entity);
 
   const handleSubmit = async () => {
+    console.log(form.formState.errors);
     const isValid = await form.trigger();
     if (!isValid) return;
+    console.log("Form is valid, submitting...");
 
     setIsSubmitting(true);
     try {
       // Get all form data
       const formData = form.getValues();
-      const { student, ...payload } = formData;
-      const payloadData = {
-        ...student,
-        ...payload,
-      };
-      // Submit to your API
-      console.log("Form submitted:", payloadData);
-      CollegePost.mutate(payloadData, {
-        onSuccess: (data: any) => {
-          toast.success(data.detail || "Form submitted successfully", {
-            description: `${new Date().toLocaleTimeString()}`,
-          });
-          window.location.href = "/dashboard"
-        },
-        onError: (error) => {
-          toast.error(error.message, {
-            description: `${error?.message || "Please try again later."}`,
-          });
-        },
-      });
+
+      const payloadData = generatePayload(formData);
+
+      toast.promise(
+        StudentPost.mutateAsync(payloadData), // Assuming `mutateAsync` is available and returns a promise
+        {
+          loading: "Submitting form...",
+          success: (data: any) => {
+            form.reset();
+            setCurrentStep(0);
+            setCompletedSteps([]);
+            return `${data.detail || "Form submitted successfully"
+              } - ${new Date().toLocaleTimeString()}`;
+          },
+          error: (error: any) =>
+            `${error?.message || "Please try again later."
+            } - ${new Date().toLocaleTimeString()}`,
+        }
+      );
+
       setIsSubmitting(false);
     } catch (error) {
       console.error("Error submitting form:", error);

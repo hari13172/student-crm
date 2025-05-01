@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { BookOpen } from "lucide-react";
@@ -9,86 +9,356 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { ApiSearchableSelect } from "@/components/custom-ui/searchSelect/apiSearchSelection";
 import { FileUploadField } from "./file-upload-filed";
-import { z } from "zod";
 import { routes } from "@/components/api/route";
-
-export const studentSizeSchema = z.object({
-  has_post_graduation: z.enum(["yes", "no"]).optional(),
-  education_levels: z.array(
-    z.object({
-      level: z.enum(["class_10", "class_12", "diploma", "graduation", "post_graduation"]),
-      year_of_passing: z.string(),
-      percentage_or_cgpa: z.string(),
-      school_institution: z.string(),
-      board_university: z.string(),
-      education_type: z.enum(["full_time", "part_time"]),
-      marksheet: z.any().nullable(),
-      class_10_total_mark: z.string().optional(),
-      class_12_total_mark: z.string().optional(),
-      group: z.string().optional(),
-      department: z.string().optional(),
-      percentage_in_diploma: z.string().optional(),
-      program_degree: z.string().optional(),
-      branch: z.string().optional(),
-      history_of_arrear: z.string().optional(),
-      current_arrear: z.string().optional(),
-    })
-  ),
-});
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function StudentSizeForm() {
-  const form = useFormContext();
-  const { control, watch } = form;
-
+  const { control, watch, setValue } = useFormContext();
   const [whatStudied, setWhatStudied] = useState<"class_12" | "diploma" | null>(null);
-  const hasPostGraduation = watch("student_size.has_post_graduation");
 
-  const { fields, append, remove, replace } = useFieldArray({
-    control,
-    name: "student_size.education_levels",
-  });
+  const class12Studied = watch("student_size.education_details.class12_studied");
+  const diplomaStudied = watch("student_size.education_details.diploma_studied");
+  const pgStudied = watch("student_size.education_details.pg_studied");
 
-  // Dynamically generate education_levels array
+  // Handle "What Studied" selection
   useEffect(() => {
-    const educationLevels = ["class_10"];
+    if (whatStudied === "class_12") {
+      setValue("student_size.education_details.class12_studied", true);
+      setValue("student_size.education_details.diploma_studied", false);
+    } else if (whatStudied === "diploma") {
+      setValue("student_size.education_details.class12_studied", false);
+      setValue("student_size.education_details.diploma_studied", true);
+    }
+  }, [whatStudied, setValue]);
 
-    if (whatStudied) {
-      educationLevels.push(whatStudied);
+  const renderEducationSection = (level: string) => {
+    const prefix = `student_size.education_details`;
+    const isClass10 = level === "class_10";
+    const isClass12 = level === "class_12";
+    const isDiploma = level === "diploma";
+    const isUG = level === "graduation";
+    const isPG = level === "post_graduation";
+
+    // Skip rendering if not studied
+    if ((isClass12 && !class12Studied) || (isDiploma && !diplomaStudied) || (isPG && !pgStudied)) {
+      return null;
     }
 
-    educationLevels.push("graduation");
+    return (
+      <div className="space-y-4 border p-4 rounded-md bg-muted/20">
+        <h3 className="text-lg font-semibold capitalize">{level.replace(/_/g, " ")}</h3>
 
-    if (hasPostGraduation === "yes") {
-      educationLevels.push("post_graduation");
-    }
+        <FormField
+          control={control}
+          name={`${prefix}.${isClass10 ? "class10_year" : isClass12 ? "class12_year" : isDiploma ? "diploma_year" : isUG ? "ug_year" : "pg_year"}`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Year of Passed Out</FormLabel>
+              <Input
+                type="number"
+                placeholder="Enter year"
+                {...field}
+                onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-    // Sync education levels
-    replace(
-      educationLevels.map((level: any) => ({
-        level,
-        year_of_passing: "",
-        percentage_or_cgpa: "",
-        school_institution: "",
-        board_university: "",
-        education_type: "full_time",
-        marksheet: null,
-        ...(level === "class_10" && { class_10_total_mark: '' }),
-        ...(level === "class_12" && { group: "", class_12_total_mark: "" }),
-        ...(level === "diploma" && { department: "", percentage_in_diploma: "" }),
-        ...(["graduation", "post_graduation"].includes(level) && {
-          program_degree: "",
-          branch: "",
-          history_of_arrear: "",
-          current_arrear: "",
-        }),
-      }))
+        {isClass10 && (
+          <FormField
+            control={control}
+            name={`${prefix}.class10_marks`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Class 10 Total Marks</FormLabel>
+                <Input
+                  type="number"
+                  placeholder="Enter total marks"
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {isClass12 && (
+          <FormField
+            control={control}
+            name={`${prefix}.class12_marks`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Class 12 Total Marks</FormLabel>
+                <Input
+                  type="number"
+                  placeholder="Enter total marks"
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <FormField
+          control={control}
+          name={`${prefix}.${isClass10 ? "class10_percentage" : isClass12 ? "class12_percentage" : isDiploma ? "diploma_percentage" : isUG ? "ug_percentage_cgpa" : "pg_percentage"}`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{isDiploma || isUG || isPG ? "Percentage/CGPA" : "Percentage"}</FormLabel>
+              <Input
+                type="number"
+                placeholder="Enter percentage or CGPA"
+                {...field}
+                onChange={(e) => field.onChange(parseFloat(e.target.value))}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {isClass12 && (
+          <FormField
+            control={control}
+            name={`${prefix}.class12_group`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Group</FormLabel>
+                <Input
+                  type="text"
+                  placeholder="Enter group"
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {isDiploma && (
+          <FormField
+            control={control}
+            name={`${prefix}.diploma_department`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Department</FormLabel>
+                <Input
+                  type="text"
+                  placeholder="Enter department"
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {(isUG || isPG) && (
+          <>
+            <FormField
+              control={control}
+              name={`${prefix}.${isUG ? "ug_program" : "pg_program"}`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Program Degree</FormLabel>
+                  <Input
+                    type="text"
+                    placeholder="Enter degree"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name={`${prefix}.${isUG ? "ug_branch" : "pg_branch"}`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Branch</FormLabel>
+                  <Input
+                    type="text"
+                    placeholder="Enter branch"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name={`${prefix}.${isUG ? "ug_arrear_history" : "pg_arrear_history"}`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>History of Arrears</FormLabel>
+                  <Input placeholder="Enter history of arrears" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name={`${prefix}.${isUG ? "ug_current_arrear" : "pg_current_arrear"}`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Current Arrears</FormLabel>
+                  <Input placeholder="Enter current arrears" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        <FormField
+          control={control}
+          name={`${prefix}.${isClass10 ? "class10_school" : isClass12 ? "class12_school" : isDiploma ? "diploma_college" : isUG ? "ug_college" : "pg_college"}`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{isDiploma || isUG || isPG ? "College" : "School"}</FormLabel>
+              <Input placeholder={`Enter ${isDiploma || isUG || isPG ? "college" : "school"} name`} {...field} />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {(isUG || isPG) && (
+          <FormField
+            control={control}
+            name={`${prefix}.${isUG ? "ug_university" : "pg_university"}`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>University</FormLabel>
+                <Input
+                  type="text"
+                  placeholder="Enter university"
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <FormField
+          control={control}
+          name={`${prefix}.${isClass10 ? "class10_board" : isClass12 ? "class12_board" : isDiploma ? "diploma_board" : isUG ? "ug_university" : "pg_university"}`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{isUG || isPG ? "University" : "Board"}</FormLabel>
+              <Input
+                type="text"
+                placeholder={`Enter ${isUG || isPG ? "university" : "board"}`}
+                {...field}
+                onChange={(e) => field.onChange(e.target.value)}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name={`${prefix}.${isClass10 ? "class10_education_type" : isClass12 ? "class12_education_type" : isDiploma ? "diploma_education_type" : isUG ? "ug_education_type" : "pg_education_type"}`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Education Type</FormLabel>
+              <RadioGroup
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="FullTime" id={`${level}-fulltime`} />
+                  <FormLabel htmlFor={`${level}-fulltime`}>Full Time</FormLabel>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="PartTime" id={`${level}-parttime`} />
+                  <FormLabel htmlFor={`${level}-parttime`}>Part Time</FormLabel>
+                </div>
+              </RadioGroup>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name={`${prefix}.${isClass10 ? "class10_marksheet_path" : isClass12 ? "class12_marksheet_path" : isDiploma ? "diploma_marksheet_path" : isUG ? "ug_marksheet_path" : "pg_marksheet_path"}`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload Marksheet</FormLabel>
+              <FileUploadField
+                name={field.name}
+                label="Upload Marksheet"
+                accept=".pdf,.jpg,.jpeg,.png"
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {isClass10 && (
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">What have you studied?</h3>
+            <RadioGroup
+              onValueChange={(value) => setWhatStudied(value as "class_12" | "diploma")}
+              value={whatStudied || ""}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="class_12" id="class_12" />
+                <FormLabel htmlFor="class_12">Class 12th</FormLabel>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="diploma" id="diploma" />
+                <FormLabel htmlFor="diploma">Diploma</FormLabel>
+              </div>
+            </RadioGroup>
+          </div>
+        )}
+
+        {isUG && (
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Post Graduation?</h3>
+            <FormField
+              control={control}
+              name={`${prefix}.pg_studied`}
+              render={({ field }) => (
+                <FormItem>
+                  <RadioGroup
+                    onValueChange={(value) => field.onChange(value === "true")}
+                    value={field.value.toString()}
+                    className="flex gap-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="pg_yes" />
+                      <FormLabel htmlFor="pg_yes">Yes</FormLabel>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="pg_no" />
+                      <FormLabel htmlFor="pg_no">No</FormLabel>
+                    </div>
+                  </RadioGroup>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+      </div>
     );
-  }, [whatStudied, hasPostGraduation, replace]);
+  };
 
   return (
     <Card>
       <CardContent className="space-y-6">
-        {/* Title */}
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-full bg-primary/10 text-primary">
             <BookOpen className="h-5 w-5" />
@@ -98,191 +368,11 @@ export function StudentSizeForm() {
 
         <Separator />
 
-        {/* Dynamic Form Based on Levels */}
-        {fields.map((field: any, index) => {
-          const prefix = `student_size.education_levels.${index}`;
-          const level = field.level;
-
-          return (
-            <div key={field.id} className="space-y-4 border p-4 rounded-md bg-muted/20">
-              <h3 className="text-lg font-semibold capitalize">{level.replaceAll("_", " ")}</h3>
-
-              <ApiSearchableSelect
-                control={control}
-                name={`${prefix}.year_of_passing`}
-                label="Year of Passed Out"
-                placeholder="Select year"
-                apiUrl={routes.dropdown.college.batches.get}
-                required
-              />
-
-              {/* Marks based on level */}
-              {level === "diploma" ? (
-                <Input placeholder="Percentage in Diploma" {...form.register(`${prefix}.percentage_in_diploma`)} />
-              ) : (
-                <Input placeholder="Percentage/CGPA" {...form.register(`${prefix}.percentage_or_cgpa`)} />
-              )}
-
-              {level === "class_10" && (
-                <Input placeholder="Class 10th Total Marks" {...form.register(`${prefix}.class_10_total_mark`)} />
-              )}
-
-              {level === "class_12" && (
-                <>
-                  <Input placeholder="Class 12th Total Marks" {...form.register(`${prefix}.class_12_total_mark`)} />
-                  <ApiSearchableSelect
-                    control={control}
-                    name={`${prefix}.group`}
-                    label="Group"
-                    placeholder="Select group"
-                    apiUrl={routes.dropdown.group.get}
-                    required
-                  />
-                </>
-              )}
-
-              {level === "diploma" && (
-                <ApiSearchableSelect
-                  control={control}
-                  name={`${prefix}.department`}
-                  label="Department"
-                  placeholder="Select department"
-                  apiUrl={routes.dropdown.college.departments.get}
-                  required
-                />
-              )}
-
-              {["graduation", "post_graduation"].includes(level) && (
-                <>
-                  <ApiSearchableSelect
-                    control={control}
-                    name={`${prefix}.program_degree`}
-                    label="Program Degree"
-                    placeholder="Select degree"
-                    apiUrl={routes.dropdown.college.degrees.get}
-                    required
-                  />
-                  <ApiSearchableSelect
-                    control={control}
-                    name={`${prefix}.branch`}
-                    label="Branch"
-                    placeholder="Select branch"
-                    apiUrl={routes.dropdown.branch.get}
-                    required
-                  />
-                  <Input placeholder="History of Arrears" {...form.register(`${prefix}.history_of_arrear`)} />
-                  <Input placeholder="Current Arrears" {...form.register(`${prefix}.current_arrear`)} />
-                </>
-              )}
-
-              <Input
-                placeholder="School / College / Institution"
-                {...form.register(`${prefix}.school_institution`)}
-              />
-
-              <ApiSearchableSelect
-                control={control}
-                name={`${prefix}.board_university`}
-                label="Board / University"
-                placeholder="Select Board/University"
-                apiUrl={routes.dropdown.board.get}
-                required
-              />
-
-              {/* Education Type */}
-              <div className="flex gap-4">
-                <label>
-                  <input
-                    type="radio"
-                    value="full_time"
-                    {...form.register(`${prefix}.education_type`)}
-                    defaultChecked
-                  />
-                  Full Time
-                </label>
-                <label>
-                  <input type="radio" value="part_time" {...form.register(`${prefix}.education_type`)} />
-                  Part Time
-                </label>
-              </div>
-
-              {/* Marksheet upload */}
-              <FileUploadField
-                name={`${prefix}.marksheet`}
-                label="Upload Marksheet"
-                accept=".pdf,.jpg,.jpeg,.png"
-              />
-
-              {/* Show What Studied selection after Class 10th */}
-              {level === "class_10" && (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">What have you studied?</h3>
-                  <FormItem>
-                    <FormControl>
-                      <div className="flex gap-4">
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            value="class_12"
-                            checked={whatStudied === "class_12"}
-                            onChange={() => setWhatStudied("class_12")}
-                          />
-                          Class 12th
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            value="diploma"
-                            checked={whatStudied === "diploma"}
-                            onChange={() => setWhatStudied("diploma")}
-                          />
-                          Diploma
-                        </label>
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                </div>
-              )}
-
-              {/* Show Post Graduation selection after Graduation */}
-              {level === "graduation" && (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Post Graduation?</h3>
-                  <FormField
-                    control={control}
-                    name="student_size.has_post_graduation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <div className="flex gap-4">
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                value="yes"
-                                checked={field.value === "yes"}
-                                onChange={() => field.onChange("yes")}
-                              />
-                              Yes
-                            </label>
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                value="no"
-                                checked={field.value === "no"}
-                                onChange={() => field.onChange("no")}
-                              />
-                              No
-                            </label>
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {renderEducationSection("class_10")}
+        {renderEducationSection("class_12")}
+        {renderEducationSection("diploma")}
+        {renderEducationSection("graduation")}
+        {renderEducationSection("post_graduation")}
       </CardContent>
     </Card>
   );

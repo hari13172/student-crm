@@ -31,7 +31,7 @@ export function TermsAndConditionsForm() {
             registration.
           </p>
 
-          <Separator/>
+          <Separator />
 
           <Card className="border border-muted">
             <CardContent className="p-4 max-h-[300px] overflow-y-auto">
@@ -108,7 +108,7 @@ export function TermsAndConditionsForm() {
 
           <FormField
             control={form.control}
-            name="college_terms_and_conditions.accept"
+            name="student_terms_and_conditions.accept"
             render={({ field }) => (
               <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                 <FormControl>

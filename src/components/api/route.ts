@@ -44,13 +44,15 @@ export const routes = {
   },
   students: {
     get: `/api/students`,
+    add_entity: `/api/students/add-entity`,
+
     // training: `api//training`,
   },
   dropdown: {
     group_12th: createRoutes(`/api/dropdown_12th_groups`),
     diploma_departments: createRoutes(`/api/dropdown_diploma_departments`),
-    religion: createRoutes(`/api/dropdown_religions`),
-    caste: createRoutes(`/api/dropdown_castes`),
+    religion: createRoutes(`/api/dropdown_religion`),
+    caste: createRoutes(`/api/dropdown_caste`),
     gender: createRoutes(`/api/dropdown_genders`),
     board: createRoutes(`/api/dropdown_boards`),
     university: createRoutes(`/api/dropdown_universities`),

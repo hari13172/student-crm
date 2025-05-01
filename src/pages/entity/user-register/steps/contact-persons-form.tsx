@@ -38,7 +38,7 @@ export function ContactPersonsForm() {
       form.setValue("student.permanent_district", communicationValues.communication_district);
       form.setValue("student.permanent_state", communicationValues.communication_state);
       form.setValue("student.permanent_country", communicationValues.communication_country);
-      form.setValue("student.permanent_pin_code", communicationValues.communication_pin_code);
+      form.setValue("student.perm   anent_pin_code", communicationValues.communication_pin_code);
     }
   };
 
@@ -63,7 +63,7 @@ export function ContactPersonsForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="student.communication_address_line1"
+                name="student_contact_persons.communication_address_line1"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -82,7 +82,7 @@ export function ContactPersonsForm() {
 
               <FormField
                 control={form.control}
-                name="student.communication_address_line2"
+                name="student_contact_persons.communication_address_line2"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Address Line 2</FormLabel>
@@ -96,7 +96,7 @@ export function ContactPersonsForm() {
 
               <ApiSearchableSelect
                 control={form.control}
-                name="student.communication_district"
+                name="student_contact_persons.communication_district"
                 label="District"
                 placeholder="Select..."
                 apiUrl={routes.dropdown.district.get}
@@ -106,7 +106,7 @@ export function ContactPersonsForm() {
 
               <ApiSearchableSelect
                 control={form.control}
-                name="student.communication_state"
+                name="student_contact_persons.communication_state"
                 label="State"
                 placeholder="Select..."
                 apiUrl={routes.dropdown.state.get}
@@ -116,7 +116,7 @@ export function ContactPersonsForm() {
 
               <ApiSearchableSelect
                 control={form.control}
-                name="student.communication_country"
+                name="student_contact_persons.communication_country"
                 label="Country"
                 placeholder="Select..."
                 apiUrl={routes.dropdown.country.get}
@@ -126,7 +126,7 @@ export function ContactPersonsForm() {
 
               <FormField
                 control={form.control}
-                name="student.communication_pin_code"
+                name="student_contact_persons.communication_pin_code"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -166,7 +166,7 @@ export function ContactPersonsForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="student.permanent_address_line1"
+                name="student_contact_persons.permanent_address_line1"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -199,7 +199,7 @@ export function ContactPersonsForm() {
 
               <ApiSearchableSelect
                 control={form.control}
-                name="student.permanent_district"
+                name="student_contact_persons.permanent_district"
                 label="District"
                 placeholder="Select..."
                 apiUrl={routes.dropdown.district.get}
@@ -209,7 +209,7 @@ export function ContactPersonsForm() {
 
               <ApiSearchableSelect
                 control={form.control}
-                name="student.permanent_state"
+                name="student_contact_persons.permanent_state"
                 label="State"
                 placeholder="Select..."
                 apiUrl={routes.dropdown.state.get}
@@ -219,7 +219,7 @@ export function ContactPersonsForm() {
 
               <ApiSearchableSelect
                 control={form.control}
-                name="student.permanent_country"
+                name="student_contact_persons.permanent_country"
                 label="Country"
                 placeholder="Select..."
                 apiUrl={routes.dropdown.country.get}
@@ -229,7 +229,7 @@ export function ContactPersonsForm() {
 
               <FormField
                 control={form.control}
-                name="student.permanent_pin_code"
+                name="student_contact_persons.permanent_pin_code"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>

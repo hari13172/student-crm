@@ -50,6 +50,7 @@ interface ApiSearchableSelectProps {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+
 }
 
 export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
@@ -61,6 +62,7 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
   placeholder = "Select an option",
   required = false,
   disabled = false,
+
 }) => {
   // Local state to manage search query, drawer visibility, API data, pagination and loading.
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,7 +172,7 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
                   value={
                     field.value
                       ? optionsData.find((o) => o.id === field.value)?.name ||
-                        ""
+                      ""
                       : ""
                   }
                   placeholder={placeholder}

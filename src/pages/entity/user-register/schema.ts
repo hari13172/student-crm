@@ -1,3 +1,4 @@
+import { Form } from "react-router";
 import { z } from "zod"
 
 // Student Information Schema
@@ -41,33 +42,63 @@ export const contactPersonsSchema = z.object({
 });
 
 
-// Student Size Schema
-// Student Size Schema
 export const studentSizeSchema = z.object({
-  education_levels: z.array(
-    z.object({
-      level: z.enum(["class_10", "class_12", "diploma", "graduation", "post_graduation"]),
-      year_of_passing: z.string().optional(),
-      percentage_or_cgpa: z.string().optional(),
-      school_institution: z.string().optional(),
-      board_university: z.string().optional(),
-      education_type: z.enum(["full_time", "part_time"]).default("full_time"),
-      marksheet: z.any().optional(), // File upload handled by FileUploadField
-      // Class 10th specific fields
-      class_10_total_mark: z.string().optional(),
-      // Class 12th specific fields
-      group: z.string().optional(),
-      // Diploma-specific fields
-      department: z.string().optional(),
-      percentage_in_diploma: z.string().optional(),
-      // Graduation/Post Graduation-specific fields
-      program_degree: z.string().optional(),
-      branch: z.string().optional(),
-      history_of_arrear: z.string().optional(),
-      current_arrear: z.string().optional(),
-    })
-  ).min(1, "At least one education level is required"),
-  has_post_graduation: z.enum(["yes", "no"]).default("no"),
+  education_details: z.object({
+    // Class 10
+    class10_year: z.number().optional(),
+    class10_marks: z.number().optional(),
+    class10_percentage: z.number().optional(),
+    class10_school: z.string().optional(),
+    class10_board: z.enum(["CBSE", "ICSE", "State", "Other"]).default("CBSE"),
+    class10_education_type: z.enum(["FullTime", "PartTime"]).default("FullTime"),
+    class10_marksheet_path: z.string().optional(),
+
+    // Class 12
+    class12_studied: z.boolean().default(false),
+    class12_year: z.number().optional(),
+    class12_marks: z.number().optional(),
+    class12_percentage: z.number().optional(),
+    class12_group: z.string().optional(), // UUID or string ID
+    class12_school: z.string().optional(),
+    class12_board: z.enum(["CBSE", "ICSE", "State", "Other"]).default("CBSE"),
+    class12_education_type: z.enum(["FullTime", "PartTime"]).default("FullTime"),
+    class12_marksheet_path: z.string().optional(),
+
+    // Diploma
+    diploma_studied: z.boolean().default(false),
+    diploma_year: z.number().optional(),
+    diploma_percentage: z.number().optional(),
+    diploma_department: z.string().optional(), // UUID or string ID
+    diploma_college: z.string().optional(),
+    diploma_board: z.enum(["CBSE", "ICSE", "State", "Other"]).default("CBSE"),
+    diploma_education_type: z.enum(["FullTime", "PartTime"]).default("FullTime"),
+    diploma_marksheet_path: z.string().optional(),
+
+    // Undergraduate
+    ug_year: z.number().optional(),
+    ug_percentage_cgpa: z.number().optional(),
+    ug_program: z.string().optional(), // UUID or string ID
+    ug_branch: z.string().optional(), // UUID or string ID
+    ug_college: z.string().optional(),
+    ug_university: z.string().optional(), // UUID or string ID
+    ug_arrear_history: z.string().optional(),
+    ug_current_arrear: z.string().optional(),
+    ug_education_type: z.enum(["FullTime", "PartTime"]).default("FullTime"),
+    ug_marksheet_path: z.string().optional(),
+
+    // Postgraduate
+    pg_studied: z.boolean().default(false),
+    pg_year: z.number().optional(),
+    pg_percentage: z.number().optional(),
+    pg_program: z.string().optional(), // UUID or string ID
+    pg_branch: z.string().optional(), // UUID or string ID
+    pg_college: z.string().optional(),
+    pg_university: z.string().optional(), // UUID or string ID
+    pg_arrear_history: z.string().optional(),
+    pg_current_arrear: z.string().optional(),
+    pg_education_type: z.enum(["FullTime", "PartTime"]).default("FullTime"),
+    pg_marksheet_path: z.string().optional(),
+  }),
 });
 
 // Student Documents Schema
@@ -150,8 +181,121 @@ export const studentRegistrationSchema = z.object({
   student: studentSchema,
   student_contact_persons: contactPersonsSchema,
   student_size: studentSizeSchema,
-  student_documents: studentDocumentsSchema,
   student_experience_skill: experienceSkillSchema, // New field
   student_photos_signature: photosSignatureSchema, // New field
   student_terms_and_conditions: termsAndConditionsSchema,
 })
+
+
+type FormData = z.infer<typeof studentRegistrationSchema>;
+
+export const generatePayload = (formData: FormData) => {
+return {
+  first_name: formData.student.first_name,
+  middle_name: formData.student.middle_name,
+  last_name: formData.student.last_name,
+  registration_number: formData.student.registration_number,
+  aadhar_number: formData.student.aadhar_number,
+  father_name: formData.student.father_name,
+  mother_name: formData.student.mother_name,
+  religion: formData.student.religion,
+  caste: formData.student.caste,
+  email: formData.student.email,
+  phone_number: formData.student.phone_number,
+  date_of_birth: formData.student.date_of_birth,
+  gender: formData.student.gender,
+  batch_id: formData.student.year_of_passing,
+  degree_id: formData.student.degree,
+  department_id: formData.student.department,
+
+
+  contact_details: {
+    comm_address_line1: formData.student_contact_persons.communication_address_line1,
+    comm_address_line2: formData.student_contact_persons.communication_address_line2,
+    comm_district: formData.student_contact_persons.communication_district,
+    comm_state: formData.student_contact_persons.communication_state,
+    comm_country: formData.student_contact_persons.communication_country,
+    comm_pin_code: formData.student_contact_persons.communication_pin_code,
+    perm_address_line1: formData.student_contact_persons.permanent_address_line1,
+    perm_address_line2: formData.student_contact_persons.permanent_address_line2,
+    perm_district: formData.student_contact_persons.permanent_district,
+    perm_state: formData.student_contact_persons.permanent_state,
+    perm_country: formData.student_contact_persons.permanent_country,
+    perm_pin_code: formData.student_contact_persons.permanent_pin_code,
+  },
+
+  education_details:{
+    class10_year: String(formData.student_size.education_details.class10_year),
+    class10_marks: formData.student_size.education_details.class10_marks,
+    class10_percentage: formData.student_size.education_details.class10_percentage,
+    class10_school: formData.student_size.education_details.class10_school,
+    class10_board: formData.student_size.education_details.class10_board,
+    class10_education_type: formData.student_size.education_details.class10_education_type,
+    class10_marksheet_path: formData.student_size.education_details.class10_marksheet_path,
+
+    class12_studied: formData.student_size.education_details.class12_studied,
+    class12_year: formData.student_size.education_details.class12_year,
+    class12_marks: formData.student_size.education_details.class12_marks,
+    class12_percentage: formData.student_size.education_details.class12_percentage,
+    class12_group: formData.student_size.education_details.class12_group,
+    class12_school: formData.student_size.education_details.class12_school,
+    class12_board: formData.student_size.education_details.class12_board,
+    class12_education_type: formData.student_size.education_details.class12_education_type,
+    class12_marksheet_path: formData.student_size.education_details.class12_marksheet_path,
+
+
+    diploma_studied: formData.student_size.education_details.diploma_studied,
+    diploma_year: formData.student_size.education_details.diploma_year,
+    diploma_percentage: formData.student_size.education_details.diploma_percentage,
+    diploma_department: formData.student_size.education_details.diploma_department,
+    diploma_college: formData.student_size.education_details.diploma_college,
+    diploma_board: formData.student_size.education_details.diploma_board,
+    diploma_education_type: formData.student_size.education_details.diploma_education_type,
+    diploma_marksheet_path: formData.student_size.education_details.diploma_marksheet_path,
+
+
+    ug_year: formData.student_size.education_details.ug_year,
+    ug_percentage_cgpa: formData.student_size.education_details.ug_percentage_cgpa,
+    ug_program: formData.student_size.education_details.ug_program,
+    ug_branch: formData.student_size.education_details.ug_branch,
+    ug_college: formData.student_size.education_details.ug_college,
+    ug_university: formData.student_size.education_details.ug_university,
+    ug_arrear_history: formData.student_size.education_details.ug_arrear_history,
+    ug_current_arrear: formData.student_size.education_details.ug_current_arrear,
+    ug_education_type: formData.student_size.education_details.ug_education_type,
+    ug_marksheet_path: formData.student_size.education_details.ug_marksheet_path,
+
+
+    pg_studied: formData.student_size.education_details.pg_studied,
+    pg_year: formData.student_size.education_details.pg_year,
+    pg_percentage: formData.student_size.education_details.pg_percentage,
+    pg_program: formData.student_size.education_details.pg_program,
+    pg_branch: formData.student_size.education_details.pg_branch,
+    pg_college: formData.student_size.education_details.pg_college,
+    pg_university: formData.student_size.education_details.pg_university,
+    pg_arrear_history: formData.student_size.education_details.pg_arrear_history,
+    pg_current_arrear: formData.student_size.education_details.pg_current_arrear,
+    pg_education_type: formData.student_size.education_details.pg_education_type,
+    pg_marksheet_path: formData.student_size.education_details.pg_marksheet_path,
+  },
+  experiences: formData.student_experience_skill.experience || [],
+  internships: formData.student_experience_skill.internship || [],
+  skills: formData.student_experience_skill.skill || [],
+  languages: formData.student_experience_skill.language || [],
+
+
+  photos_signature: {
+    photo: formData.student_photos_signature.photo,
+    signature: formData.student_photos_signature.signature,
+  },
+
+
+  terms_and_conditions: {
+    accept: formData.student_terms_and_conditions.accept,
+  },
+
+
+}
+
+
+}
