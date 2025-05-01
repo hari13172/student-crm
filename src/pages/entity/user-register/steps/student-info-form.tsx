@@ -19,6 +19,7 @@ import { useFormContext } from "react-hook-form";
 
 export function StudentInfoForm() {
   const form = useFormContext();
+  const watchedValues = form.watch();
 
   return (
     <div className="space-y-4">
@@ -164,7 +165,7 @@ export function StudentInfoForm() {
               label="Religion"
               placeholder="Select..."
               apiUrl={routes.dropdown.religion.get} // Adjust this route as needed
-              required={isFieldRequired(studentSchema, "religion")}
+              required={isFieldRequired(studentSchema, "religion.id")}
               disabled={false}
             />
 
@@ -175,7 +176,7 @@ export function StudentInfoForm() {
               label="Caste"
               placeholder="Type Here"
               apiUrl={routes.dropdown.caste.get} // Adjust this route as needed
-              required={isFieldRequired(studentSchema, "caste")}
+              required={isFieldRequired(studentSchema, "caste.id")}
               disabled={false}
             />
 
@@ -244,14 +245,31 @@ export function StudentInfoForm() {
             />
 
             {/* Gender */}
-            <ApiSearchableSelect
+            <FormField
               control={form.control}
               name="student.gender"
-              label="Gender"
-              placeholder="Select..."
-              apiUrl={routes.dropdown.gender.get} // Adjust this route as needed
-              required={isFieldRequired(studentSchema, "gender")}
-              disabled={false}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Gender
+                    {isFieldRequired(studentSchema, "gender") && (
+                      <span className="text-destructive">*</span>
+                    )}
+                  </FormLabel>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    >
+                      <option value="">Select...</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             {/* College */}
@@ -272,7 +290,7 @@ export function StudentInfoForm() {
               label="Degree"
               placeholder="Select..."
               apiUrl={routes.dropdown.college.degrees.get} // Adjust this route as needed
-              required={isFieldRequired(studentSchema, "degree")}
+              required={isFieldRequired(studentSchema, "degree.id")}
               disabled={false}
             />
 
@@ -283,8 +301,8 @@ export function StudentInfoForm() {
               label="Department"
               placeholder="Select..."
               apiUrl={routes.dropdown.college.departments.get} // Adjust this route as needed
-              required={isFieldRequired(studentSchema, "department")}
-              disabled={false}
+              disabled={!watchedValues.student.degree.id}
+              filter={`{"degree":{"$eq":"${watchedValues.student.degree.id}"}}`}
             />
 
             {/* Year of Passing */}
@@ -294,7 +312,7 @@ export function StudentInfoForm() {
               label="Year of Passing"
               placeholder="Select..."
               apiUrl={routes.dropdown.college.batches.get} // Adjust this route as needed
-              required={isFieldRequired(studentSchema, "year_of_passing")}
+              required={isFieldRequired(studentSchema, "year_of_passing.id")}
               disabled={false}
             />
           </div>

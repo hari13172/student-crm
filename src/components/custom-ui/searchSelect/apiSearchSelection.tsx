@@ -30,7 +30,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface Option {
   id: string;
-  name: string;
+  value: string;
 }
 
 interface ApiResponse {
@@ -50,7 +50,6 @@ interface ApiSearchableSelectProps {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
-
 }
 
 export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
@@ -62,9 +61,7 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
   placeholder = "Select an option",
   required = false,
   disabled = false,
-
 }) => {
-  // Local state to manage search query, drawer visibility, API data, pagination and loading.
   const [searchQuery, setSearchQuery] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [optionsData, setOptionsData] = useState<Option[]>([]);
@@ -73,29 +70,26 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const isMobile = useIsMobile();
-  // containerRef: used to get the scrollable container for the options list.
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Memoized authorized headers.
   const CustomHeader = React.useMemo(() => AuthorizedHeader(), []);
 
-  // Function to fetch API data.
   const fetchOptions = useCallback(
     async (pageToFetch: number, search: string) => {
-      if (disabled) return; // Prevent fetching if disabled is true.
+      if (disabled) return;
       setIsLoading(true);
       try {
-        let url = `${import.meta.env.VITE_APP_API_URL}${apiUrl}?page=${pageToFetch}&size=50`;
+        let url = `${import.meta.env.VITE_APP_API_URL
+          }${apiUrl}?page=${pageToFetch}&size=50`;
         if (filter) {
-          url += `&filters=${filter}`;
+          url += `& filters=${filter}`;
         }
         if (search.trim() !== "") {
-          // Build a filter: the API expects the filter as a URL-encoded JSON string using $contains.
           const filters = encodeURIComponent(
-            JSON.stringify({ name: { $contains: search } })
+            JSON.stringify({ value: { $contains: search } })
           );
-          url += `&filters=${filters}`;
+          url += ` & filters=${filters}`;
         }
         const res = await fetch(url, {
           headers: {
@@ -122,14 +116,11 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
     [apiUrl, CustomHeader, disabled]
   );
 
-  // Whenever the searchQuery changes, reset the list and fetch page 1.
   useEffect(() => {
-    if (disabled) return; // Prevent fetching if disabled is true.
+    if (disabled) return;
     setOptionsData([]);
     setPage(1);
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
+    if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
     debounceTimeoutRef.current = setTimeout(() => {
       fetchOptions(1, searchQuery);
     }, 300);
@@ -138,15 +129,13 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
     };
   }, [searchQuery, fetchOptions, disabled]);
 
-  // onScroll handler for infinite scrolling.
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (disabled || isLoading || page >= totalPages) return; // Prevent fetching if disabled is true.
+    if (disabled || isLoading || page >= totalPages) return;
     const container = e.currentTarget;
     if (
       container.scrollTop + container.clientHeight >=
       container.scrollHeight - 10
     ) {
-      // Fetch next page when scrolled near bottom.
       fetchOptions(page + 1, searchQuery);
     }
   };
@@ -161,7 +150,6 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
             {label} {required && <span className="text-destructive">*</span>}
           </FormLabel>
           {isMobile ? (
-            // Mobile view: Read-only input that opens a Drawer.
             <>
               <div className="relative">
                 <Input
@@ -169,12 +157,7 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
                   readOnly
                   disabled={disabled}
                   onFocus={() => setDrawerOpen(true)}
-                  value={
-                    field.value
-                      ? optionsData.find((o) => o.id === field.value)?.name ||
-                      ""
-                      : ""
-                  }
+                  value={field.value?.value ?? ""}
                   placeholder={placeholder}
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -185,9 +168,7 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
                 open={drawerOpen}
                 onOpenChange={(isOpen) => {
                   setDrawerOpen(isOpen);
-                  if (!isOpen) {
-                    (document.activeElement as HTMLElement)?.blur();
-                  }
+                  if (!isOpen) (document.activeElement as HTMLElement)?.blur();
                 }}
               >
                 <DrawerContent>
@@ -195,7 +176,6 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
                     <DrawerTitle>{label}</DrawerTitle>
                     <DrawerClose onClick={() => setDrawerOpen(false)} />
                   </DrawerHeader>
-                  {/* Search input inside the Drawer */}
                   <div className="p-2 flex items-center space-x-2 relative">
                     <Search className="text-muted-foreground/50 h-4 w-4 absolute top-1/2 -translate-y-1/2 left-4" />
                     <Input
@@ -210,25 +190,26 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
                       disabled={disabled}
                     />
                   </div>
-                  {/* Options list with infinite scroll */}
                   <div
                     ref={containerRef}
                     onScroll={handleScroll}
                     className="max-h-60 overflow-y-auto p-2"
                   >
-                    {optionsData.length > 0 &&
-                      optionsData.map((option) => (
-                        <div
-                          key={option.id}
-                          onClick={() => {
-                            field.onChange(option.id);
-                            setDrawerOpen(false);
-                          }}
-                          className="p-2 hover:bg-gray-100 cursor-pointer rounded"
-                        >
-                          {option.name}
-                        </div>
-                      ))}
+                    {optionsData.map((option) => (
+                      <div
+                        key={option.id}
+                        onClick={() => {
+                          field.onChange({
+                            id: option.id,
+                            value: option.value,
+                          });
+                          setDrawerOpen(false);
+                        }}
+                        className="p-2 hover:bg-gray-100 cursor-pointer rounded"
+                      >
+                        {option.value}
+                      </div>
+                    ))}
                     {isLoading && (
                       <div className="p-2 flex justify-center items-center space-x-2 text-gray-500">
                         <Loader2 className="animate-spin h-5 w-5" />
@@ -239,19 +220,24 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
               </Drawer>
             </>
           ) : (
-            // Desktop view: Standard Select component.
             <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
+              onValueChange={(val) => {
+                const selected = optionsData.find((o) => o.id === val);
+                if (selected)
+                  field.onChange({ id: selected.id, value: selected.value });
+              }}
+              defaultValue={field.value?.id ?? ""}
               disabled={disabled}
             >
               <FormControl className="w-full">
                 <SelectTrigger disabled={disabled}>
-                  <SelectValue placeholder={placeholder} />
+                  <SelectValue
+                    placeholder={placeholder}
+                    defaultValue={field.value?.value ?? ""}
+                  />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {/* Search input inside the dropdown */}
                 <div className="p-2 flex items-center space-x-2 relative">
                   <Search className="text-muted-foreground/50 h-4 w-4 absolute top-1/2 -translate-y-1/2 left-4" />
                   <Input
@@ -266,18 +252,16 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
                     disabled={disabled}
                   />
                 </div>
-                {/* Options list with infinite scroll */}
                 <div
                   ref={containerRef}
                   onScroll={handleScroll}
                   className="max-h-60 overflow-y-auto"
                 >
-                  {optionsData.length > 0 &&
-                    optionsData.map((option) => (
-                      <SelectItem key={option.id} value={option.id}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
+                  {optionsData.map((option) => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {option.value}
+                    </SelectItem>
+                  ))}
                   {isLoading && (
                     <div className="p-2 flex justify-center items-center space-x-2 text-gray-500">
                       <Loader2 className="animate-spin h-5 w-5" />
@@ -287,9 +271,7 @@ export const ApiSearchableSelect: React.FC<ApiSearchableSelectProps> = ({
               </SelectContent>
             </Select>
           )}
-          <FormMessage>
-            {fieldState.error ? fieldState.error.message : null}
-          </FormMessage>
+          <FormMessage>{fieldState.error?.message}</FormMessage>
         </FormItem>
       )}
     />

@@ -11,17 +11,36 @@ export const studentSchema = z.object({
     .string().optional(),
   father_name: z.string().optional(),
   mother_name: z.string().optional(),
-  religion: z.string().optional(),
-  caste: z.string().optional(),
+  religion: z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  caste:  z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
   email: z.string().optional(),
   phone_number: z.string().optional(),
   date_of_birth: z.string().optional(),
   gender: z.string().optional(),
-  college: z.string().optional(),
-  degree: z.string().optional(),
-  department: z.string().optional(),
-  year_of_passing: z.string().optional(),
+  college:  z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  degree:  z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  department:  z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  year_of_passing:  z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
 });
+
 
 
 
@@ -29,15 +48,33 @@ export const studentSchema = z.object({
 export const contactPersonsSchema = z.object({
   communication_address_line1: z.string().optional(),
   communication_address_line2: z.string().optional(),
-  communication_district: z.string().optional(),
-  communication_state: z.string().optional(),
-  communication_country: z.string().optional(),
+  communication_district: z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  communication_state: z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  communication_country: z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
   communication_pin_code: z.string().optional(),
   permanent_address_line1: z.string().optional(),
   permanent_address_line2: z.string().optional(),
-  permanent_district: z.string().optional(),
-  permanent_state: z.string().optional(),
-  permanent_country: z.string().optional(),
+  permanent_district: z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  permanent_state: z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
+  permanent_country: z.object({
+    id: z.string(),
+    value: z.string(),
+  }).optional(),
   permanent_pin_code: z.string().optional(),
 });
 
@@ -136,9 +173,7 @@ export const experienceSkillSchema = z.object({
     .array(
       z.object({
         company_name: z.string().optional(),
-        duration_days: z
-          .string()
-          .optional(),
+        duration_days: z.string().optional(),
         start_date: z.string().optional(),
         end_date: z.string().optional(),
         description: z.string().optional(),
@@ -146,10 +181,12 @@ export const experienceSkillSchema = z.object({
     )
     .optional(),
   skill: z
-    .object({
-      technical_skill: z.string(),
-      proficiency: z.string(),
-    })
+    .array(
+      z.object({
+        technical_skill: z.string().optional(),
+        proficiency: z.string().optional(),
+      })
+    )
     .optional(),
   language: z
     .array(
@@ -198,33 +235,32 @@ return {
   aadhar_number: formData.student.aadhar_number,
   father_name: formData.student.father_name,
   mother_name: formData.student.mother_name,
-  religion: formData.student.religion,
-  caste: formData.student.caste,
+  religion: formData.student.religion?.id || "",
+  caste: formData.student.caste?.id || "",
   email: formData.student.email,
   phone_number: formData.student.phone_number,
   date_of_birth: formData.student.date_of_birth,
   gender: formData.student.gender,
-  batch_id: formData.student.year_of_passing,
-  degree_id: formData.student.degree,
-  department_id: formData.student.department,
-
+  batch_id: formData.student.year_of_passing?.id || "",
+  degree_id: formData.student.degree?.id || "",
+  department_id: formData.student.department?.id || "",
 
   contact_details: {
     comm_address_line1: formData.student_contact_persons.communication_address_line1,
     comm_address_line2: formData.student_contact_persons.communication_address_line2,
-    comm_district: formData.student_contact_persons.communication_district,
-    comm_state: formData.student_contact_persons.communication_state,
-    comm_country: formData.student_contact_persons.communication_country,
+    comm_district: formData.student_contact_persons.communication_district?.id || "",
+    comm_state: formData.student_contact_persons.communication_state?.id || "" ,
+    comm_country: formData.student_contact_persons.communication_country?.id || "",
     comm_pin_code: formData.student_contact_persons.communication_pin_code,
     perm_address_line1: formData.student_contact_persons.permanent_address_line1,
     perm_address_line2: formData.student_contact_persons.permanent_address_line2,
-    perm_district: formData.student_contact_persons.permanent_district,
-    perm_state: formData.student_contact_persons.permanent_state,
-    perm_country: formData.student_contact_persons.permanent_country,
+    perm_district: formData.student_contact_persons.permanent_district?.id || "",
+    perm_state: formData.student_contact_persons.permanent_state?.id || "",
+    perm_country: formData.student_contact_persons.permanent_country?.id || "",
     perm_pin_code: formData.student_contact_persons.permanent_pin_code,
   },
 
-  education_details:{
+  education_details: {
     class10_year: String(formData.student_size.education_details.class10_year),
     class10_marks: formData.student_size.education_details.class10_marks,
     class10_percentage: formData.student_size.education_details.class10_percentage,
@@ -234,7 +270,7 @@ return {
     class10_marksheet_path: formData.student_size.education_details.class10_marksheet_path,
 
     class12_studied: formData.student_size.education_details.class12_studied,
-    class12_year: formData.student_size.education_details.class12_year,
+    class12_year: String(formData.student_size.education_details.class12_year),
     class12_marks: formData.student_size.education_details.class12_marks,
     class12_percentage: formData.student_size.education_details.class12_percentage,
     class12_group: formData.student_size.education_details.class12_group,
@@ -243,9 +279,8 @@ return {
     class12_education_type: formData.student_size.education_details.class12_education_type,
     class12_marksheet_path: formData.student_size.education_details.class12_marksheet_path,
 
-
     diploma_studied: formData.student_size.education_details.diploma_studied,
-    diploma_year: formData.student_size.education_details.diploma_year,
+    diploma_year: String(formData.student_size.education_details.diploma_year),
     diploma_percentage: formData.student_size.education_details.diploma_percentage,
     diploma_department: formData.student_size.education_details.diploma_department,
     diploma_college: formData.student_size.education_details.diploma_college,
@@ -253,8 +288,7 @@ return {
     diploma_education_type: formData.student_size.education_details.diploma_education_type,
     diploma_marksheet_path: formData.student_size.education_details.diploma_marksheet_path,
 
-
-    ug_year: formData.student_size.education_details.ug_year,
+    ug_year: String(formData.student_size.education_details.ug_year),
     ug_percentage_cgpa: formData.student_size.education_details.ug_percentage_cgpa,
     ug_program: formData.student_size.education_details.ug_program,
     ug_branch: formData.student_size.education_details.ug_branch,
@@ -265,9 +299,8 @@ return {
     ug_education_type: formData.student_size.education_details.ug_education_type,
     ug_marksheet_path: formData.student_size.education_details.ug_marksheet_path,
 
-
     pg_studied: formData.student_size.education_details.pg_studied,
-    pg_year: formData.student_size.education_details.pg_year,
+    pg_year: String(formData.student_size.education_details.pg_year),
     pg_percentage: formData.student_size.education_details.pg_percentage,
     pg_program: formData.student_size.education_details.pg_program,
     pg_branch: formData.student_size.education_details.pg_branch,
@@ -278,24 +311,37 @@ return {
     pg_education_type: formData.student_size.education_details.pg_education_type,
     pg_marksheet_path: formData.student_size.education_details.pg_marksheet_path,
   },
-  experiences: formData.student_experience_skill.experience || [],
-  internships: formData.student_experience_skill.internship || [],
-  skills: formData.student_experience_skill.skill || [],
-  languages: formData.student_experience_skill.language || [],
 
+  experiences: formData.student_experience_skill.experience?.map((exp) => ({
+    experience_status: exp.has_experience === "yes",
+    field: exp.field_of_experience || "",
+    years: exp.total_years ? parseInt(exp.total_years, 10) : 0,
+    start_date: exp.start_date || null,
+    end_date: exp.end_date || null,
+    tools_used: exp.tools_used || null,
+    description: exp.description || null,
+  })) || [],
+
+  internships: formData.student_experience_skill.internship || [],
+
+  
+  skills: formData.student_experience_skill.skill
+    ? formData.student_experience_skill.skill.map((skill) => ({
+        name: skill.technical_skill,
+        proficiency: skill.proficiency,
+      }))
+    : [],
+  languages: formData.student_experience_skill.language || [],
 
   photos_signature: {
     photo: formData.student_photos_signature.photo,
     signature: formData.student_photos_signature.signature,
   },
 
-
-  terms_and_conditions: {
+  student_terms_and_conditions: {
     accept: formData.student_terms_and_conditions.accept,
   },
-
-
-}
+};
 
 
 }

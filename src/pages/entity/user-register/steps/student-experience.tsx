@@ -8,26 +8,79 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ApiSearchableSelect } from "@/components/custom-ui/searchSelect/apiSearchSelection";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase } from "lucide-react";
-import { useFormContext } from "react-hook-form";
-import { useState } from "react";
+import { Briefcase, Plus } from "lucide-react";
+import { useFormContext, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { experienceSkillSchema } from "../schema";
-import { isFieldRequired } from "@/components/zod/checkFieldRequired";
-import { routes } from "@/components/api/route";
 
 export function ExperienceSkillForm() {
-  const form = useFormContext();
-  const [experienceCount, setExperienceCount] = useState(1);
-  const [internshipCount, setInternshipCount] = useState(1);
-  const [languageCount, setLanguageCount] = useState(1);
+  const { control } = useFormContext();
 
-  const addExperience = () => setExperienceCount((prev) => prev + 1);
-  const addInternship = () => setInternshipCount((prev) => prev + 1);
-  const addLanguage = () => setLanguageCount((prev) => prev + 1);
+  // Manage the experiences array dynamically
+  const { fields: experienceFields, append: appendExperience } = useFieldArray({
+    control,
+    name: "student_experience_skill.experiences",
+  });
+
+  // Manage the internships array dynamically
+  const { fields: internshipFields, append: appendInternship } = useFieldArray({
+    control,
+    name: "student_experience_skill.internships",
+  });
+
+  // Manage the skills array dynamically
+  const { fields: skillFields, append: appendSkill } = useFieldArray({
+    control,
+    name: "student_experience_skill.skills",
+  });
+
+  // Manage the languages array dynamically
+  const { fields: languageFields, append: appendLanguage } = useFieldArray({
+    control,
+    name: "student_experience_skill.languages",
+  });
+
+  // Add a new experience entry
+  const handleAddExperience = () => {
+    appendExperience({
+      field: "",
+      years: 0,
+      start_date: "",
+      end_date: "",
+      tools_used: "",
+      description: "",
+    });
+  };
+
+  // Add a new internship entry
+  const handleAddInternship = () => {
+    appendInternship({
+      company_name: "",
+      duration_days: 0,
+      start_date: "",
+      end_date: "",
+      description: "",
+    });
+  };
+
+  // Add a new skill entry
+  const handleAddSkill = () => {
+    appendSkill({
+      name: "",
+      proficiency: "",
+    });
+  };
+
+  // Add a new language entry
+  const handleAddLanguage = () => {
+    appendLanguage({
+      name: "",
+      can_read: false,
+      can_write: false,
+      can_speak: false,
+    });
+  };
 
   return (
     <Card>
@@ -50,180 +103,18 @@ export function ExperienceSkillForm() {
           {/* Experience Section */}
           <div>
             <h3 className="text-lg font-medium mb-2">Experience</h3>
-            {Array.from({ length: experienceCount }, (_, index) => (
-              <div key={`experience-${index}`} className="space-y-4 mb-4">
+            {experienceFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
-                    control={form.control}
-                    name={`experience[${index}].has_experience`}
+                    control={control}
+                    name={`student_experience_skill.experiences.${index}.field`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          Do you have any Experience?
-                          {isFieldRequired(
-                            experienceSkillSchema,
-                            `experience.has_experience`
-                          ) && <span className="text-destructive">*</span>}
-                        </FormLabel>
-                        <FormControl>
-                          <div className="flex items-center space-x-4">
-                            <label>
-                              <input
-                                type="radio"
-
-                                {...field}
-                                checked={field.value === "yes"}
-                                onChange={() => field.onChange("yes")}
-                              />{" "}
-                              Yes
-                            </label>
-                            <label>
-                              <input
-                                type="radio"
-
-                                {...field}
-                                checked={field.value === "no"}
-                                onChange={() => field.onChange("no")}
-                              />{" "}
-                              No
-                            </label>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.watch(`experience.has_experience`) === "yes" && (
-                    <>
-                      <ApiSearchableSelect
-                        control={form.control}
-                        name={`experience.field_of_experience`}
-                        label="Field of Experience"
-                        placeholder="Select..."
-                        apiUrl={routes.dropdown.experience_field.get}
-                        required={isFieldRequired(
-                          experienceSkillSchema,
-                          `experience.field_of_experience`
-                        )}
-                        disabled={false}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`experience.total_years`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Total years of Experience
-                              {isFieldRequired(
-                                experienceSkillSchema,
-                                `experience.total_years`
-                              ) && <span className="text-destructive">*</span>}
-                            </FormLabel>
-                            <FormControl>
-                              <Input placeholder="Type here" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`experience.start_date`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Start Date</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`experience.end_date`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>End Date</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <ApiSearchableSelect
-                        control={form.control}
-                        name={`experience.tools_used`}
-                        label="Tools used"
-                        placeholder="Select..."
-                        apiUrl={routes.dropdown.tools.get}
-                        required={isFieldRequired(
-                          experienceSkillSchema,
-                          `experience.tools_used`
-                        )}
-                        disabled={false}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`experience.description`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Description about experience
-                              {isFieldRequired(
-                                experienceSkillSchema,
-                                `experience.description`
-                              ) && <span className="text-destructive">*</span>}
-                            </FormLabel>
-                            <FormControl>
-                              <Input placeholder="Type here" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </>
-                  )}
-                </div>
-                {index === experienceCount - 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addExperience}
-                    className="mt-2"
-                  >
-                    + Add More Experience
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Internship Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-2">Internship</h3>
-            {Array.from({ length: internshipCount }, (_, index) => (
-              <div key={`internship-${index}`} className="space-y-4 mb-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name={`internship[${index}].company_name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Company Name
-                          {isFieldRequired(
-                            experienceSkillSchema,
-                            `internship.company_name`
-                          ) && <span className="text-destructive">*</span>}
-                        </FormLabel>
+                        <FormLabel>Field of Experience</FormLabel>
                         <FormControl>
                           <Input placeholder="Type here" {...field} />
                         </FormControl>
@@ -233,19 +124,20 @@ export function ExperienceSkillForm() {
                   />
 
                   <FormField
-                    control={form.control}
-                    name={`internship.duration_days`}
+                    control={control}
+                    name={`student_experience_skill.experiences.${index}.years`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          Duration in Days
-                          {isFieldRequired(
-                            experienceSkillSchema,
-                            `internship.duration_days`
-                          ) && <span className="text-destructive">*</span>}
-                        </FormLabel>
+                        <FormLabel>Total years of Experience</FormLabel>
                         <FormControl>
-                          <Input placeholder="Type here" {...field} />
+                          <Input
+                            type="number"
+                            placeholder="Type here"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value) || 0)
+                            }
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -253,8 +145,8 @@ export function ExperienceSkillForm() {
                   />
 
                   <FormField
-                    control={form.control}
-                    name={`internship.start_date`}
+                    control={control}
+                    name={`student_experience_skill.experiences.${index}.start_date`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
@@ -267,8 +159,8 @@ export function ExperienceSkillForm() {
                   />
 
                   <FormField
-                    control={form.control}
-                    name={`internship.end_date`}
+                    control={control}
+                    name={`student_experience_skill.experiences.${index}.end_date`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>End Date</FormLabel>
@@ -281,17 +173,25 @@ export function ExperienceSkillForm() {
                   />
 
                   <FormField
-                    control={form.control}
-                    name={`internship.description`}
+                    control={control}
+                    name={`student_experience_skill.experiences.${index}.tools_used`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          Description about experience
-                          {isFieldRequired(
-                            experienceSkillSchema,
-                            `internship.description`
-                          ) && <span className="text-destructive">*</span>}
-                        </FormLabel>
+                        <FormLabel>Tools used</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Type here" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.experiences.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description about experience</FormLabel>
                         <FormControl>
                           <Input placeholder="Type here" {...field} />
                         </FormControl>
@@ -300,74 +200,233 @@ export function ExperienceSkillForm() {
                     )}
                   />
                 </div>
-                {index === internshipCount - 1 && (
+                {index === experienceFields.length - 1 && (
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={addInternship}
+                    onClick={handleAddExperience}
                     className="mt-2"
                   >
-                    + Add More Internship
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add More Experience
                   </Button>
                 )}
               </div>
             ))}
+            {!experienceFields.length && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddExperience}
+                className="mt-2"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Experience
+              </Button>
+            )}
+          </div>
+
+          {/* Internship Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-2">Internship</h3>
+            {internshipFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.internships.${index}.company_name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Type here" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.internships.${index}.duration_days`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Duration in Days</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Type here"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value) || 0)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.internships.${index}.start_date`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.internships.${index}.end_date`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.internships.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Type here" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                {index === internshipFields.length - 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddInternship}
+                    className="mt-2"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add More Internship
+                  </Button>
+                )}
+              </div>
+            ))}
+            {!internshipFields.length && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddInternship}
+                className="mt-2"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Internship
+              </Button>
+            )}
           </div>
 
           {/* Skill Section */}
           <div>
             <h3 className="text-lg font-medium mb-2">Skill</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ApiSearchableSelect
-                control={form.control}
-                name="skill.technical_skill"
-                label="Select your technical skill"
-                placeholder="Select..."
-                apiUrl={routes.dropdown.technical_skill.get}
-                required={isFieldRequired(
-                  experienceSkillSchema,
-                  "skill.technical_skill"
-                )}
-                disabled={false}
-              />
+            {skillFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.skills.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select your technical skill</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Type here" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <ApiSearchableSelect
-                control={form.control}
-                name="skill.proficiency"
-                label="Select Proficiency"
-                placeholder="Select..."
-                apiUrl={routes.dropdown.proficiency.get}
-                required={isFieldRequired(
-                  experienceSkillSchema,
-                  "skill.proficiency"
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.skills.${index}.proficiency`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select Proficiency</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Type here" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                {index === skillFields.length - 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddSkill}
+                    className="mt-2"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add More Skill
+                  </Button>
                 )}
-                disabled={false}
-              />
-            </div>
+              </div>
+            ))}
+            {!skillFields.length && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddSkill}
+                className="mt-2"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Skill
+              </Button>
+            )}
           </div>
 
           {/* Language Section */}
           <div>
             <h3 className="text-lg font-medium mb-2">Language</h3>
-            {Array.from({ length: languageCount }, (_, index) => (
-              <div key={`language-${index}`} className="space-y-4 mb-4">
+            {languageFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ApiSearchableSelect
-                    control={form.control}
-                    name={`language.language_known`}
-                    label="Language Known"
-                    placeholder="Select..."
-                    apiUrl={routes.dropdown.language.get}
-                    required={isFieldRequired(
-                      experienceSkillSchema,
-                      `language.language_known`
+                  <FormField
+                    control={control}
+                    name={`student_experience_skill.languages.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Language Known</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Type here" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                    disabled={false}
                   />
 
                   <FormField
-                    control={form.control}
-                    name={`language[${index}].read`}
+                    control={control}
+                    name={`student_experience_skill.languages.${index}.can_read`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Read</FormLabel>
@@ -376,9 +435,7 @@ export function ExperienceSkillForm() {
                             type="checkbox"
                             {...field}
                             checked={field.value || false}
-                            onChange={(e) =>
-                              field.onChange(e.target.checked)
-                            }
+                            onChange={(e) => field.onChange(e.target.checked)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -387,8 +444,8 @@ export function ExperienceSkillForm() {
                   />
 
                   <FormField
-                    control={form.control}
-                    name={`language[${index}].write`}
+                    control={control}
+                    name={`student_experience_skill.languages.${index}.can_write`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Write</FormLabel>
@@ -397,9 +454,7 @@ export function ExperienceSkillForm() {
                             type="checkbox"
                             {...field}
                             checked={field.value || false}
-                            onChange={(e) =>
-                              field.onChange(e.target.checked)
-                            }
+                            onChange={(e) => field.onChange(e.target.checked)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -408,8 +463,8 @@ export function ExperienceSkillForm() {
                   />
 
                   <FormField
-                    control={form.control}
-                    name={`language[${index}].speak`}
+                    control={control}
+                    name={`student_experience_skill.languages.${index}.can_speak`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Speak</FormLabel>
@@ -418,9 +473,7 @@ export function ExperienceSkillForm() {
                             type="checkbox"
                             {...field}
                             checked={field.value || false}
-                            onChange={(e) =>
-                              field.onChange(e.target.checked)
-                            }
+                            onChange={(e) => field.onChange(e.target.checked)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -428,18 +481,30 @@ export function ExperienceSkillForm() {
                     )}
                   />
                 </div>
-                {index === languageCount - 1 && (
+                {index === languageFields.length - 1 && (
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={addLanguage}
+                    onClick={handleAddLanguage}
                     className="mt-2"
                   >
-                    + Add More Language
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add More Language
                   </Button>
                 )}
               </div>
             ))}
+            {!languageFields.length && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddLanguage}
+                className="mt-2"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Language
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

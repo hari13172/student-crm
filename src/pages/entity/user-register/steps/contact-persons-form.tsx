@@ -16,30 +16,60 @@ import { contactPersonsSchema } from "../schema";
 import { isFieldRequired } from "@/components/zod/checkFieldRequired";
 import { routes } from "@/components/api/route";
 import { useFormContext } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function ContactPersonsForm() {
-  const form = useFormContext();
+  const { control, watch, setValue, getValues } = useFormContext();
   const [isPermanentSameAsCommunication, setIsPermanentSameAsCommunication] = useState(false);
 
-  // Function to copy Communication Address to Permanent Address
-  const handleCopyAddress = () => {
+  // Watch individual communication address fields
+  const commAddressLine1 = watch("student_contact_persons.communication_address_line1");
+  const commAddressLine2 = watch("student_contact_persons.communication_address_line2");
+  const commDistrict = watch("student_contact_persons.communication_district");
+  const commState = watch("student_contact_persons.communication_state");
+  const commCountry = watch("student_contact_persons.communication_country");
+  const commPinCode = watch("student_contact_persons.communication_pin_code");
+
+  // Update permanent address fields when communication address changes and checkbox is checked
+  useEffect(() => {
     if (isPermanentSameAsCommunication) {
-      const communicationValues = {
-        communication_address_line1: form.getValues("student.communication_address_line1") || "",
-        communication_address_line2: form.getValues("student.communication_address_line2") || "",
-        communication_district: form.getValues("student.communication_district") || "",
-        communication_state: form.getValues("student.communication_state") || "",
-        communication_country: form.getValues("student.communication_country") || "",
-        communication_pin_code: form.getValues("student.communication_pin_code") || "",
-      };
-      form.setValue("student.permanent_address_line1", communicationValues.communication_address_line1);
-      form.setValue("student.permanent_address_line2", communicationValues.communication_address_line2);
-      form.setValue("student.permanent_district", communicationValues.communication_district);
-      form.setValue("student.permanent_state", communicationValues.communication_state);
-      form.setValue("student.permanent_country", communicationValues.communication_country);
-      form.setValue("student.perm   anent_pin_code", communicationValues.communication_pin_code);
+      // Only update if values differ to prevent infinite loop
+      const currentValues = getValues();
+      if (currentValues.student_contact_persons.permanent_address_line1 !== (commAddressLine1 || "")) {
+        setValue("student_contact_persons.permanent_address_line1", commAddressLine1 || "", { shouldDirty: true });
+      }
+      if (currentValues.student_contact_persons.permanent_address_line2 !== (commAddressLine2 || "")) {
+        setValue("student_contact_persons.permanent_address_line2", commAddressLine2 || "", { shouldDirty: true });
+      }
+      if (currentValues.student_contact_persons.permanent_district !== (commDistrict || "")) {
+        setValue("student_contact_persons.permanent_district", commDistrict || "", { shouldDirty: true });
+      }
+      if (currentValues.student_contact_persons.permanent_state !== (commState || "")) {
+        setValue("student_contact_persons.permanent_state", commState || "", { shouldDirty: true });
+      }
+      if (currentValues.student_contact_persons.permanent_country !== (commCountry || "")) {
+        setValue("student_contact_persons.permanent_country", commCountry || "", { shouldDirty: true });
+      }
+      if (currentValues.student_contact_persons.permanent_pin_code !== (commPinCode || "")) {
+        setValue("student_contact_persons.permanent_pin_code", commPinCode || "", { shouldDirty: true });
+      }
     }
+  }, [
+    isPermanentSameAsCommunication,
+    commAddressLine1,
+    commAddressLine2,
+    commDistrict,
+    commState,
+    commCountry,
+    commPinCode,
+    setValue,
+    getValues,
+  ]);
+
+  // Handle checkbox change
+  const handleCheckboxChange = (checked: boolean) => {
+    setIsPermanentSameAsCommunication(checked);
   };
 
   return (
@@ -62,7 +92,7 @@ export function ContactPersonsForm() {
             <h3 className="text-lg font-medium mb-2">Communication Address</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={control}
                 name="student_contact_persons.communication_address_line1"
                 render={({ field }) => (
                   <FormItem>
@@ -81,7 +111,7 @@ export function ContactPersonsForm() {
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name="student_contact_persons.communication_address_line2"
                 render={({ field }) => (
                   <FormItem>
@@ -95,37 +125,38 @@ export function ContactPersonsForm() {
               />
 
               <ApiSearchableSelect
-                control={form.control}
-                name="student_contact_persons.communication_district"
-                label="District"
-                placeholder="Select..."
-                apiUrl={routes.dropdown.district.get}
-                required={isFieldRequired(contactPersonsSchema, "communication_district")}
-                disabled={false}
-              />
-
-              <ApiSearchableSelect
-                control={form.control}
-                name="student_contact_persons.communication_state"
-                label="State"
-                placeholder="Select..."
-                apiUrl={routes.dropdown.state.get}
-                required={isFieldRequired(contactPersonsSchema, "communication_state")}
-                disabled={false}
-              />
-
-              <ApiSearchableSelect
-                control={form.control}
+                control={control}
                 name="student_contact_persons.communication_country"
                 label="Country"
                 placeholder="Select..."
                 apiUrl={routes.dropdown.country.get}
                 required={isFieldRequired(contactPersonsSchema, "communication_country")}
-                disabled={false}
+              />
+
+              <ApiSearchableSelect
+                control={control}
+                name="student_contact_persons.communication_state"
+                label="State"
+                placeholder="Select..."
+                apiUrl={routes.dropdown.state.get}
+                required={isFieldRequired(contactPersonsSchema, "communication_state")}
+                disabled={!watch("student_contact_persons.communication_country")}
+                filter={`{"country_id":{"$eq":"${watch("student_contact_persons.communication_country")}"}}`}
+              />
+
+              <ApiSearchableSelect
+                control={control}
+                name="student_contact_persons.communication_district"
+                label="District"
+                placeholder="Select..."
+                apiUrl={routes.dropdown.district.get}
+                required={isFieldRequired(contactPersonsSchema, "communication_district")}
+                disabled={!watch("student_contact_persons.communication_state")}
+                filter={`{"state_id":{"$eq":"${watch("student_contact_persons.communication_state")}"}}`}
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name="student_contact_persons.communication_pin_code"
                 render={({ field }) => (
                   <FormItem>
@@ -149,23 +180,18 @@ export function ContactPersonsForm() {
           <div>
             <h3 className="text-lg font-medium mb-2">Permanent Address</h3>
             <div className="flex items-center mb-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 id="sameAsCommunication"
                 checked={isPermanentSameAsCommunication}
-                onChange={(e) => {
-                  setIsPermanentSameAsCommunication(e.target.checked);
-                  handleCopyAddress();
-                }}
-                className="mr-2"
+                onCheckedChange={handleCheckboxChange}
               />
-              <label htmlFor="sameAsCommunication" className="text-sm">
+              <label htmlFor="sameAsCommunication" className="ml-2 text-sm">
                 Permanent Address is same as Communication Address
               </label>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={control}
                 name="student_contact_persons.permanent_address_line1"
                 render={({ field }) => (
                   <FormItem>
@@ -176,7 +202,11 @@ export function ContactPersonsForm() {
                       )}
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Type here" {...field} disabled={isPermanentSameAsCommunication} />
+                      <Input
+                        placeholder="Type here"
+                        {...field}
+                        disabled={isPermanentSameAsCommunication}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -184,13 +214,17 @@ export function ContactPersonsForm() {
               />
 
               <FormField
-                control={form.control}
-                name="student.permanent_address_line2"
+                control={control}
+                name="student_contact_persons.permanent_address_line2"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Address Line 2</FormLabel>
                     <FormControl>
-                      <Input placeholder="Type here" {...field} disabled={isPermanentSameAsCommunication} />
+                      <Input
+                        placeholder="Type here"
+                        {...field}
+                        disabled={isPermanentSameAsCommunication}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,27 +232,7 @@ export function ContactPersonsForm() {
               />
 
               <ApiSearchableSelect
-                control={form.control}
-                name="student_contact_persons.permanent_district"
-                label="District"
-                placeholder="Select..."
-                apiUrl={routes.dropdown.district.get}
-                required={isFieldRequired(contactPersonsSchema, "permanent_district")}
-                disabled={isPermanentSameAsCommunication}
-              />
-
-              <ApiSearchableSelect
-                control={form.control}
-                name="student_contact_persons.permanent_state"
-                label="State"
-                placeholder="Select..."
-                apiUrl={routes.dropdown.state.get}
-                required={isFieldRequired(contactPersonsSchema, "permanent_state")}
-                disabled={isPermanentSameAsCommunication}
-              />
-
-              <ApiSearchableSelect
-                control={form.control}
+                control={control}
                 name="student_contact_persons.permanent_country"
                 label="Country"
                 placeholder="Select..."
@@ -227,8 +241,34 @@ export function ContactPersonsForm() {
                 disabled={isPermanentSameAsCommunication}
               />
 
+              <ApiSearchableSelect
+                control={control}
+                name="student_contact_persons.permanent_state"
+                label="State"
+                placeholder="Select..."
+                apiUrl={routes.dropdown.state.get}
+                required={isFieldRequired(contactPersonsSchema, "permanent_state")}
+                disabled={
+                  isPermanentSameAsCommunication || !watch("student_contact_persons.permanent_country")
+                }
+                filter={`{"country_id":{"$eq":"${watch("student_contact_persons.permanent_country")}"}}`}
+              />
+
+              <ApiSearchableSelect
+                control={control}
+                name="student_contact_persons.permanent_district"
+                label="District"
+                placeholder="Select..."
+                apiUrl={routes.dropdown.district.get}
+                required={isFieldRequired(contactPersonsSchema, "permanent_district")}
+                disabled={
+                  isPermanentSameAsCommunication || !watch("student_contact_persons.permanent_state")
+                }
+                filter={`{"state_id":{"$eq":"${watch("student_contact_persons.permanent_state")}"}}`}
+              />
+
               <FormField
-                control={form.control}
+                control={control}
                 name="student_contact_persons.permanent_pin_code"
                 render={({ field }) => (
                   <FormItem>
@@ -239,7 +279,11 @@ export function ContactPersonsForm() {
                       )}
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Type here" {...field} disabled={isPermanentSameAsCommunication} />
+                      <Input
+                        placeholder="Type here"
+                        {...field}
+                        disabled={isPermanentSameAsCommunication}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
