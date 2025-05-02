@@ -124,7 +124,7 @@ export function StudentRegistrationForm() {
         },
       },
       student_experience_skill: {
-        experience: [
+        experiences: [
           {
             has_experience: "no",
             field_of_experience: "",
@@ -135,27 +135,27 @@ export function StudentRegistrationForm() {
             description: "",
           },
         ],
-        internship: [
+        internships: [
           {
             company_name: "",
-            duration_days: "0",
+            duration_days: 0,
             start_date: "",
             end_date: "",
             description: "",
           },
         ],
-        skill: [
+        skills: [
           {
-            technical_skill: undefined,
-            proficiency: undefined,
+            name: "",
+            proficiency: "",
           },
-        ] as { technical_skill?: string; proficiency?: string }[],
-        language: [
+        ] as { name?: string; proficiency?: string }[],
+        languages: [
           {
-            language_known: "",
-            read: false,
-            write: false,
-            speak: false,
+            name: "",
+            can_read: false,
+            can_write: false,
+            can_speak: false,
           },
         ],
       },

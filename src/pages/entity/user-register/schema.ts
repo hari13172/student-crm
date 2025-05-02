@@ -148,11 +148,9 @@ export const studentDocumentsSchema = z.object({
 
 
 
-
-
 // Experience Skill Schema
 export const experienceSkillSchema = z.object({
-  experience: z
+  experiences: z
     .array(
       z.object({
         has_experience: z
@@ -169,32 +167,32 @@ export const experienceSkillSchema = z.object({
       })
     )
     .optional(),
-  internship: z
+  internships: z
     .array(
       z.object({
         company_name: z.string().optional(),
-        duration_days: z.string().optional(),
+        duration_days: z.number().optional(),
         start_date: z.string().optional(),
         end_date: z.string().optional(),
         description: z.string().optional(),
       })
     )
     .optional(),
-  skill: z
+  skills: z
     .array(
       z.object({
-        technical_skill: z.string().optional(),
+        name: z.string().optional(),
         proficiency: z.string().optional(),
       })
     )
     .optional(),
-  language: z
+  languages: z
     .array(
       z.object({
-        language_known: z.string().optional(),
-        read: z.boolean().optional(),
-        write: z.boolean().optional(),
-        speak: z.boolean().optional(),
+        name: z.string().optional(),
+        can_read: z.boolean().optional(),
+        can_write: z.boolean().optional(),
+        can_speak: z.boolean().optional(),
       })
     )
     .optional(),
@@ -312,7 +310,7 @@ return {
     pg_marksheet_path: formData.student_size.education_details.pg_marksheet_path,
   },
 
-  experiences: formData.student_experience_skill.experience?.map((exp) => ({
+  experiences: formData.student_experience_skill.experiences?.map((exp) => ({
     experience_status: exp.has_experience === "yes",
     field: exp.field_of_experience || "",
     years: exp.total_years ? parseInt(exp.total_years, 10) : 0,
@@ -322,16 +320,26 @@ return {
     description: exp.description || null,
   })) || [],
 
-  internships: formData.student_experience_skill.internship || [],
+  internships: formData.student_experience_skill.internships?.map((internship) => ({
+    company_name: internship.company_name || "",
+    duration_days: internship.duration_days || 0,
+    start_date: internship.start_date || null,
+    end_date: internship.end_date || null,
+    description: internship.description || null,
+  })) || [],
 
-  
-  skills: formData.student_experience_skill.skill
-    ? formData.student_experience_skill.skill.map((skill) => ({
-        name: skill.technical_skill,
-        proficiency: skill.proficiency,
+  skills: formData.student_experience_skill.skills
+    ? formData.student_experience_skill.skills.map((skill) => ({
+        name: String(skill.name),
+        proficiency: String(skill.proficiency),
       }))
     : [],
-  languages: formData.student_experience_skill.language || [],
+  languages: formData.student_experience_skill.languages?.map((lang) => ({
+    name: lang.name || "",
+    can_read: lang.can_read || false,
+    can_write: lang.can_speak || false,
+    can_speak: lang.can_write || false,
+  })) || [],
 
   photos_signature: {
     photo: formData.student_photos_signature.photo,
