@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   FormControl,
@@ -10,40 +11,60 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase, Plus } from "lucide-react";
+import { Briefcase, Plus, X } from "lucide-react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 
 export function ExperienceSkillForm() {
   const { control } = useFormContext();
 
+  // State to manage visibility of each section
+  const [isExperienceVisible, setIsExperienceVisible] = useState(false);
+  const [isInternshipVisible, setIsInternshipVisible] = useState(false);
+  const [isSkillVisible, setIsSkillVisible] = useState(false);
+  const [isLanguageVisible, setIsLanguageVisible] = useState(false);
+
   // Manage the experiences array dynamically
-  const { fields: experienceFields, append: appendExperience } = useFieldArray({
+  const {
+    fields: experienceFields,
+    append: appendExperience,
+    remove: removeExperience,
+  } = useFieldArray({
     control,
     name: "student_experience_skill.experiences",
   });
 
   // Manage the internships array dynamically
-  const { fields: internshipFields, append: appendInternship } = useFieldArray({
+  const {
+    fields: internshipFields,
+    append: appendInternship,
+    remove: removeInternship,
+  } = useFieldArray({
     control,
     name: "student_experience_skill.internships",
   });
 
   // Manage the skills array dynamically
-  const { fields: skillFields, append: appendSkill } = useFieldArray({
-    control,
-    name: "student_experience_skill.skills",
-  });
+  const { fields: skillFields, append: appendSkill, remove: removeSkill } =
+    useFieldArray({
+      control,
+      name: "student_experience_skill.skills",
+    });
 
   // Manage the languages array dynamically
-  const { fields: languageFields, append: appendLanguage } = useFieldArray({
+  const {
+    fields: languageFields,
+    append: appendLanguage,
+    remove: removeLanguage,
+  } = useFieldArray({
     control,
     name: "student_experience_skill.languages",
   });
 
-  // Add a new experience entry
+  // Add a new experience entry and show the section
   const handleAddExperience = () => {
     appendExperience({
+      has_experience: "yes", // Set to "yes" when opening the section
       field: "",
       years: 0,
       start_date: "",
@@ -51,9 +72,16 @@ export function ExperienceSkillForm() {
       tools_used: "",
       description: "",
     });
+    setIsExperienceVisible(true);
   };
 
-  // Add a new internship entry
+  // Close the experience section
+  const handleCloseExperience = () => {
+    removeExperience(); // Remove all experience entries
+    setIsExperienceVisible(false);
+  };
+
+  // Add a new internship entry and show the section
   const handleAddInternship = () => {
     appendInternship({
       company_name: "",
@@ -62,17 +90,31 @@ export function ExperienceSkillForm() {
       end_date: "",
       description: "",
     });
+    setIsInternshipVisible(true);
   };
 
-  // Add a new skill entry
+  // Close the internship section
+  const handleCloseInternship = () => {
+    removeInternship(); // Remove all internship entries
+    setIsInternshipVisible(false);
+  };
+
+  // Add a new skill entry and show the section
   const handleAddSkill = () => {
     appendSkill({
       name: "",
       proficiency: "",
     });
+    setIsSkillVisible(true);
   };
 
-  // Add a new language entry
+  // Close the skill section
+  const handleCloseSkill = () => {
+    removeSkill(); // Remove all skill entries
+    setIsSkillVisible(false);
+  };
+
+  // Add a new language entry and show the section
   const handleAddLanguage = () => {
     appendLanguage({
       name: "",
@@ -80,6 +122,13 @@ export function ExperienceSkillForm() {
       can_write: false,
       can_speak: false,
     });
+    setIsLanguageVisible(true);
+  };
+
+  // Close the language section
+  const handleCloseLanguage = () => {
+    removeLanguage(); // Remove all language entries
+    setIsLanguageVisible(false);
   };
 
   return (
@@ -95,125 +144,140 @@ export function ExperienceSkillForm() {
             </h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Please provide details about your experience, skills, internships,
-            and languages.
+            Please provide details about your experience, skills, internships, and
+            languages.
           </p>
           <Separator />
 
           {/* Experience Section */}
           <div>
-            <h3 className="text-lg font-medium mb-2">Experience</h3>
-            {experienceFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.experiences.${index}.field`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Field of Experience</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium mb-2">Experience</h3>
+              {isExperienceVisible && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseExperience}
+                  className="mb-2"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Close
+                </Button>
+              )}
+            </div>
+            {isExperienceVisible &&
+              experienceFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.experiences.${index}.field`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Field of Experience</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.experiences.${index}.years`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Total years of Experience</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Type here"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.experiences.${index}.years`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Total Years of Experience</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Type here"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseFloat(e.target.value) || 0)
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.experiences.${index}.start_date`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.experiences.${index}.start_date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Start Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.experiences.${index}.end_date`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>End Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.experiences.${index}.end_date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>End Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.experiences.${index}.tools_used`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tools used</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.experiences.${index}.tools_used`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tools Used</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.experiences.${index}.description`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description about experience</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.experiences.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description About Experience</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {index === experienceFields.length - 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddExperience}
+                      className="mt-2"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add More Experience
+                    </Button>
+                  )}
                 </div>
-                {index === experienceFields.length - 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleAddExperience}
-                    className="mt-2"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add More Experience
-                  </Button>
-                )}
-              </div>
-            ))}
-            {!experienceFields.length && (
+              ))}
+            {!isExperienceVisible && (
               <Button
                 type="button"
                 variant="outline"
@@ -228,104 +292,117 @@ export function ExperienceSkillForm() {
 
           {/* Internship Section */}
           <div>
-            <h3 className="text-lg font-medium mb-2">Internship</h3>
-            {internshipFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.internships.${index}.company_name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium mb-2">Internship</h3>
+              {isInternshipVisible && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseInternship}
+                  className="mb-2"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Close
+                </Button>
+              )}
+            </div>
+            {isInternshipVisible &&
+              internshipFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.internships.${index}.company_name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Company Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.internships.${index}.duration_days`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Duration in Days</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Type here"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.internships.${index}.duration_days`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Duration in Days</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Type here"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.internships.${index}.start_date`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.internships.${index}.start_date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Start Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.internships.${index}.end_date`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>End Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.internships.${index}.end_date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>End Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.internships.${index}.description`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.internships.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {index === internshipFields.length - 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddInternship}
+                      className="mt-2"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add More Internship
+                    </Button>
+                  )}
                 </div>
-                {index === internshipFields.length - 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleAddInternship}
-                    className="mt-2"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add More Internship
-                  </Button>
-                )}
-              </div>
-            ))}
-            {!internshipFields.length && (
+              ))}
+            {!isInternshipVisible && (
               <Button
                 type="button"
                 variant="outline"
@@ -340,55 +417,70 @@ export function ExperienceSkillForm() {
 
           {/* Skill Section */}
           <div>
-            <h3 className="text-lg font-medium mb-2">Skill</h3>
-            {skillFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.skills.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Select your technical skill</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium mb-2">Skill</h3>
+              {isSkillVisible && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseSkill}
+                  className="mb-2"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Close
+                </Button>
+              )}
+            </div>
+            {isSkillVisible &&
+              skillFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.skills.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Technical Skill</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.skills.${index}.proficiency`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Select Proficiency</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.skills.${index}.proficiency`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Proficiency</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {index === skillFields.length - 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddSkill}
+                      className="mt-2"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add More Skill
+                    </Button>
+                  )}
                 </div>
-                {index === skillFields.length - 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleAddSkill}
-                    className="mt-2"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add More Skill
-                  </Button>
-                )}
-              </div>
-            ))}
-            {!skillFields.length && (
+              ))}
+            {!isSkillVisible && (
               <Button
                 type="button"
                 variant="outline"
@@ -403,98 +495,113 @@ export function ExperienceSkillForm() {
 
           {/* Language Section */}
           <div>
-            <h3 className="text-lg font-medium mb-2">Language</h3>
-            {languageFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.languages.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Language Known</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Type here" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium mb-2">Language</h3>
+              {isLanguageVisible && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseLanguage}
+                  className="mb-2"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Close
+                </Button>
+              )}
+            </div>
+            {isLanguageVisible &&
+              languageFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="space-y-4 mb-4 border p-4 rounded-md bg-muted/20"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.languages.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Language Known</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Type here" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.languages.${index}.can_read`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Read</FormLabel>
-                        <FormControl>
-                          <input
-                            type="checkbox"
-                            {...field}
-                            checked={field.value || false}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.languages.${index}.can_read`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Read</FormLabel>
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              {...field}
+                              checked={field.value || false}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.languages.${index}.can_write`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Write</FormLabel>
-                        <FormControl>
-                          <input
-                            type="checkbox"
-                            {...field}
-                            checked={field.value || false}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.languages.${index}.can_write`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Write</FormLabel>
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              {...field}
+                              checked={field.value || false}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={control}
-                    name={`student_experience_skill.languages.${index}.can_speak`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Speak</FormLabel>
-                        <FormControl>
-                          <input
-                            type="checkbox"
-                            {...field}
-                            checked={field.value || false}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={control}
+                      name={`student_experience_skill.languages.${index}.can_speak`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Speak</FormLabel>
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              {...field}
+                              checked={field.value || false}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {index === languageFields.length - 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddLanguage}
+                      className="mt-2"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add More Language
+                    </Button>
+                  )}
                 </div>
-                {index === languageFields.length - 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleAddLanguage}
-                    className="mt-2"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add More Language
-                  </Button>
-                )}
-              </div>
-            ))}
-            {!languageFields.length && (
+              ))}
+            {!isLanguageVisible && (
               <Button
                 type="button"
                 variant="outline"
