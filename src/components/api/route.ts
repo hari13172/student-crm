@@ -41,6 +41,24 @@ export const routes = {
     },
     college_placement: `/api/colleges/college_placements`,
     college_training: `/api/colleges/college_trainings`,
+        // College Academic API Path
+        academic: {
+          batches: {
+            get: (college_id: string) => `/api/colleges/get_batches/${college_id}`,
+            post: "/api/colleges/add_batch",
+          },
+          degrees: {
+            get: (college_batch_id: string) =>
+              `/api/colleges/get_degrees/${college_batch_id}`,
+            post: "/api/colleges/add_degree",
+          },
+          departments: {
+            get: (college_degree_id: string) =>
+              `/api/colleges/get_departments/${college_degree_id}`,
+            post: "/api/colleges/add_department",
+          },
+        },    
+
   },
   students: {
     get: `/api/students`,

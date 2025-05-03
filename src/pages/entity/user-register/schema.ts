@@ -37,7 +37,7 @@ export const studentSchema = z.object({
   }).optional(),
   year_of_passing:  z.object({
     id: z.string(),
-    value: z.string(),
+    value: z.number(),
   }).optional(),
 });
 

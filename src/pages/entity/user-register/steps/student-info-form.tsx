@@ -16,6 +16,7 @@ import { studentSchema } from "../schema";
 import { isFieldRequired } from "@/components/zod/checkFieldRequired";
 import { routes } from "@/components/api/route";
 import { useFormContext } from "react-hook-form";
+import { BatchDegreeDepartment } from "@/components/custom-ui/studentForm/BatchDegreeDepartment";
 
 export function StudentInfoForm() {
   const form = useFormContext();
@@ -285,38 +286,42 @@ export function StudentInfoForm() {
               disabled={false}
             />
 
-            {/* Degree */}
-            <ApiSearchableSelect
-              control={form.control}
-              name="student.degree"
-              label="Degree"
-              placeholder="Select..."
-              apiUrl={routes.dropdown.college.degrees.get} // Adjust this route as needed
-              required={isFieldRequired(studentSchema, "degree.id")}
-              disabled={false}
-            />
-
-            {/* Department */}
-            <ApiSearchableSelect
-              control={form.control}
-              name="student.department"
-              label="Department"
-              placeholder="Select..."
-              apiUrl={routes.dropdown.college.departments.get} // Adjust this route as needed
-              disabled={!watchedValues.student.degree.id}
-              filter={`{"degree":{"$eq":"${watchedValues.student.degree.id}"}}`}
-            />
-
             {/* Year of Passing */}
-            <ApiSearchableSelect
+            <BatchDegreeDepartment
               control={form.control}
               name="student.year_of_passing"
               label="Year of Passing"
               placeholder="Select..."
-              apiUrl={routes.dropdown.college.batches.get} // Adjust this route as needed
+              apiUrl={routes.colleges.academic.batches.get(watchedValues.student.college.id)} // Adjust this route as needed
               required={isFieldRequired(studentSchema, "year_of_passing.id")}
               disabled={false}
+              valueFieldPath="batches"
             />
+
+            {/* Degree */}
+            <BatchDegreeDepartment
+              control={form.control}
+              name="student.degree"
+              label="Degree"
+              placeholder="Select..."
+              apiUrl={routes.colleges.academic.degrees.get(watchedValues.student.year_of_passing.id)} // Adjust this route as needed
+              required={isFieldRequired(studentSchema, "degree.id")}
+              disabled={!watchedValues.student.year_of_passing.id}
+              valueFieldPath="degrees"
+            />
+
+            {/* Department */}
+            <BatchDegreeDepartment
+              control={form.control}
+              name="student.department"
+              label="Department"
+              placeholder="Select..."
+              apiUrl={routes.colleges.academic.departments.get(watchedValues.student.degree.id)} // Adjust this route as needed
+              disabled={!watchedValues.student.degree.id}
+              valueFieldPath="departments"
+            />
+
+
           </div>
         </CardContent>
       </Card>
