@@ -341,7 +341,7 @@ export function StudentSizeForm() {
                 <FormItem>
                   <RadioGroup
                     onValueChange={(value) => field.onChange(value === "true")}
-                    value={field.value}
+                    value={field.value.toString()}
                     className="flex gap-4"
                   >
                     <div className="flex items-center space-x-2">

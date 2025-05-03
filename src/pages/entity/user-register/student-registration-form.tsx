@@ -229,7 +229,7 @@ export function StudentRegistrationForm() {
           ug_marksheet_path: data.form_data.education_details.ug_marksheet_path || "",
 
 
-          pg_studied: data.form_data.education_details.pg_studied || undefined,
+          pg_studied: data.form_data.education_details.pg_studied || "",
           pg_year: parseInt(data.form_data.education_details.pg_year) || 0,
           pg_percentage: data.form_data.education_details.pg_percentage || 0,
           pg_program: data.form_data.education_details.pg_program || "",
