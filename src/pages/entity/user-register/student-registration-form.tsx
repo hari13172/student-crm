@@ -167,7 +167,7 @@ export function StudentRegistrationForm() {
         father_name: data.form_data.father_name || "",
         mother_name: data.form_data.mother_name || "",
         religion: { id: data.form_data.religion, value: data.form_data.religion || "" },
-        caste: { id: data.form_data.caste.id, value: data.form_data.caste || "" },
+        caste: { id: data.form_data.caste, value: data.form_data.caste.id || "" },
         email: data.form_data.email || "",
         phone_number: data.form_data.phone_number || "",
         date_of_birth: data.form_data.date_of_birth || "",
@@ -245,7 +245,7 @@ export function StudentRegistrationForm() {
         },
       });
       form.setValue("student_experience_skill", {
-        experiences: data.form_data.experiences || [],
+        experiences: Array.isArray(data?.form_data?.experiences) ? data.form_data.experiences : [],
         internships: data.form_data.internships || [],
         skills: data.form_data.skills || [],
         languages: data.form_data.languages || [],
