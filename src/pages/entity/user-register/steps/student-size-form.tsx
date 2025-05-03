@@ -246,29 +246,49 @@ export function StudentSizeForm() {
           />
         )}
 
-        <FormField
-          control={control}
-          name={`${prefix}.${isClass10 ? "class10_board" : isClass12 ? "class12_board" : isDiploma ? "diploma_board" : isUG ? "ug_university" : "pg_university"}`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{isUG || isPG ? "University" : "Board"}</FormLabel>
-              <select
-                className="form-select"
-                value={field.value || ""}
-                onChange={(e) => field.onChange(e.target.value)}
-              >
-                <option value="" disabled>
-                  Select {isUG || isPG ? "university" : "board"}
-                </option>
-                <option value="CBSE">CBSE</option>
-                <option value="ICSE">ICSE</option>
-                <option value="STATE">State</option>
-                <option value="OTHER">Other</option>
-              </select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {(isClass10 || isClass12 || isDiploma) && (
+          <FormField
+            control={control}
+            name={`${prefix}.${isClass10 ? "class10_board" : isClass12 ? "class12_board" : "diploma_board"}`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Board</FormLabel>
+                <select
+                  className="form-select"
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select board
+                  </option>
+                  <option value="CBSE">CBSE</option>
+                  <option value="ICSE">ICSE</option>
+                  <option value="STATE">State</option>
+                  <option value="OTHER">Other</option>
+                </select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {(isUG || isPG) && (
+          <FormField
+            control={control}
+            name={`${prefix}.${isUG ? "ug_university" : "pg_university"}`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>University</FormLabel>
+                <Input
+                  type="text"
+                  placeholder="Enter university"
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={control}

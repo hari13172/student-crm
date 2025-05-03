@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Navigate, Router, useNavigate } from "react-router";
 
 type FormData = z.infer<typeof studentRegistrationSchema>;
 
@@ -37,6 +38,7 @@ export function StudentRegistrationForm() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const navigate = useNavigate();
 
 
   const { data } = api.get<any>(routes.students.form.get);
@@ -375,6 +377,7 @@ export function StudentRegistrationForm() {
             form.reset();
             setCurrentStep(0);
             setCompletedSteps([]);
+            navigate("/");
             return `${data.detail || "Form submitted successfully"
               } - ${new Date().toLocaleTimeString()}`;
           },
