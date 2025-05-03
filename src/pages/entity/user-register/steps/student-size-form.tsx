@@ -252,12 +252,19 @@ export function StudentSizeForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>{isUG || isPG ? "University" : "Board"}</FormLabel>
-              <Input
-                type="text"
-                placeholder={`Enter ${isUG || isPG ? "university" : "board"}`}
-                {...field}
+              <select
+                className="form-select"
+                value={field.value || ""}
                 onChange={(e) => field.onChange(e.target.value)}
-              />
+              >
+                <option value="" disabled>
+                  Select {isUG || isPG ? "university" : "board"}
+                </option>
+                <option value="CBSE">CBSE</option>
+                <option value="ICSE">ICSE</option>
+                <option value="STATE">State</option>
+                <option value="OTHER">Other</option>
+              </select>
               <FormMessage />
             </FormItem>
           )}
@@ -334,7 +341,7 @@ export function StudentSizeForm() {
                 <FormItem>
                   <RadioGroup
                     onValueChange={(value) => field.onChange(value === "true")}
-                    value={field.value.toString()}
+                    value={field.value}
                     className="flex gap-4"
                   >
                     <div className="flex items-center space-x-2">

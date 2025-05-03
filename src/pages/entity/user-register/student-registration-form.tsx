@@ -16,7 +16,7 @@ import { motion } from "motion/react";
 import { routes } from "@/components/api/route";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -38,9 +38,15 @@ export function StudentRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
+
+  const { data } = api.get<any>(routes.students.form.get);
+  // console.log("Form data", data);
+
+
   const form = useForm<FormData>({
     resolver: zodResolver(studentRegistrationSchema),
     defaultValues: {
+      college_id: data?.form_data?.college_id,
       student: {
         first_name: "",
         middle_name: "",
@@ -80,25 +86,25 @@ export function StudentRegistrationForm() {
           class10_marks: 0,
           class10_percentage: 0,
           class10_school: "",
-          class10_board: "CBSE",
-          class10_education_type: "FullTime",
+          class10_board: undefined,
+          class10_education_type: undefined,
           class10_marksheet_path: "",
-          class12_studied: false,
+          class12_studied: undefined,
           class12_year: 0,
           class12_marks: 0,
           class12_percentage: 0,
           class12_group: "",
           class12_school: "",
-          class12_board: "CBSE",
-          class12_education_type: "FullTime",
+          class12_board: undefined,
+          class12_education_type: undefined,
           class12_marksheet_path: "",
-          diploma_studied: false,
+          diploma_studied: undefined,
           diploma_year: 0,
           diploma_percentage: 0,
           diploma_department: "",
           diploma_college: "",
-          diploma_board: "CBSE",
-          diploma_education_type: "FullTime",
+          diploma_board: undefined,
+          diploma_education_type: undefined,
           diploma_marksheet_path: "",
           ug_year: 0,
           ug_percentage_cgpa: 0,
@@ -108,9 +114,9 @@ export function StudentRegistrationForm() {
           ug_university: "",
           ug_arrear_history: "",
           ug_current_arrear: "",
-          ug_education_type: "FullTime",
+          ug_education_type: undefined,
           ug_marksheet_path: "",
-          pg_studied: false,
+          pg_studied: undefined,
           pg_year: 0,
           pg_percentage: 0,
           pg_program: "",
@@ -119,44 +125,21 @@ export function StudentRegistrationForm() {
           pg_university: "",
           pg_arrear_history: "",
           pg_current_arrear: "",
-          pg_education_type: "FullTime",
+          pg_education_type: undefined,
           pg_marksheet_path: "",
         },
       },
       student_experience_skill: {
         experiences: [
-          {
-            has_experience: "no",
-            field_of_experience: "",
-            total_years: "",
-            start_date: "",
-            end_date: "",
-            tools_used: "",
-            description: "",
-          },
+
         ],
         internships: [
-          {
-            company_name: "",
-            duration_days: 0,
-            start_date: "",
-            end_date: "",
-            description: "",
-          },
+
         ],
         skills: [
-          {
-            name: "",
-            proficiency: "",
-          },
-        ] as { name?: string; proficiency?: string }[],
+        ],
         languages: [
-          {
-            name: "",
-            can_read: false,
-            can_write: false,
-            can_speak: false,
-          },
+
         ],
       },
       student_photos_signature: {
@@ -164,24 +147,172 @@ export function StudentRegistrationForm() {
         signature: "",
       },
       student_terms_and_conditions: {
-        accept: false,
+        accept: undefined,
       },
     },
     mode: "onChange",
   });
 
+  useEffect(() => {
+    if (data?.form_data) {
+      form.setValue("college_id", data.form_data.college_id);
+      form.setValue("student", {
+        first_name: data.form_data.first_name || "",
+        middle_name: data.form_data.middle_name || "",
+        last_name: data.form_data.last_name || "",
+        registration_number: data.form_data.registration_number || "",
+        aadhar_number: data.form_data.aadhar_number || "",
+        father_name: data.form_data.father_name || "",
+        mother_name: data.form_data.mother_name || "",
+        religion: { id: "", value: data.form_data.religion || "" },
+        caste: { id: "", value: data.form_data.caste || "" },
+        email: data.form_data.email || "",
+        phone_number: data.form_data.phone_number || "",
+        date_of_birth: data.form_data.date_of_birth || "",
+        gender: data.form_data.gender || "",
+        college: { id: data.form_data.college_id || "", value: "" },
+        degree: { id: data.form_data.degree_id || "", value: "" },
+        department: { id: data.form_data.department_id || "", value: "" },
+        year_of_passing: { id: "", value: "" },
+      });
+      form.setValue("student_contact_persons", {
+        communication_address_line1: data.form_data.contact_details.comm_address_line1 || "",
+        communication_address_line2: data.form_data.contact_details.comm_address_line2 || "",
+        communication_district: { id: "", value: data.form_data.contact_details.comm_district || "" },
+        communication_state: { id: "", value: data.form_data.contact_details.comm_state || "" },
+        communication_country: { id: "", value: data.form_data.contact_details.comm_country || "" },
+        communication_pin_code: data.form_data.contact_details.comm_pin_code || "",
+        permanent_address_line1: data.form_data.contact_details.perm_address_line1 || "",
+        permanent_address_line2: data.form_data.contact_details.perm_address_line2 || "",
+        permanent_district: { id: "", value: data.form_data.contact_details.perm_district || "" },
+        permanent_state: { id: "", value: data.form_data.contact_details.perm_state || "" },
+        permanent_country: { id: "", value: data.form_data.contact_details.perm_country || "" },
+        permanent_pin_code: data.form_data.contact_details.perm_pin_code || "",
+      });
+      form.setValue("student_size", {
+        education_details: {
+          class10_year: parseInt(data.form_data.education_details.class10_year) || 0,
+          class10_marks: data.form_data.education_details.class10_marks || 0,
+          class10_percentage: data.form_data.education_details.class10_percentage || 0,
+          class10_school: data.form_data.education_details.class10_school || "",
+          class10_board: data.form_data.education_details.class10_board || "",
+          class10_education_type: data.form_data.education_details.class10_education_type || "",
+          class10_marksheet_path: data.form_data.education_details.class10_marksheet_path || "",
+          class12_studied: data.form_data.education_details.class12_studied || undefined,
+
+          class12_year: parseInt(data.form_data.education_details.class12_year) || 0,
+          class12_marks: data.form_data.education_details.class12_marks || 0,
+          class12_percentage: data.form_data.education_details.class12_percentage || 0,
+          class12_group: data.form_data.education_details.class12_group || "",
+          class12_school: data.form_data.education_details.class12_school || "",
+          class12_board: data.form_data.education_details.class12_board || "",
+          class12_education_type: data.form_data.education_details.class12_education_type || "",
+          class12_marksheet_path: data.form_data.education_details.class12_marksheet_path || "",
+          diploma_studied: data.form_data.education_details.diploma_studied || undefined,
+          diploma_year: parseInt(data.form_data.education_details.diploma_year) || 0,
+          diploma_percentage: data.form_data.education_details.diploma_percentage || 0,
+          diploma_department: data.form_data.education_details.diploma_department || "",
+          diploma_college: data.form_data.education_details.diploma_college || "",
+          diploma_board: data.form_data.education_details.diploma_board || "",
+          diploma_education_type: data.form_data.education_details.diploma_education_type || "",
+          diploma_marksheet_path: data.form_data.education_details.diploma_marksheet_path || "",
+
+          ug_year: parseInt(data.form_data.education_details.ug_year) || 0,
+          ug_percentage_cgpa: data.form_data.education_details.ug_percentage_cgpa || 0,
+          ug_program: data.form_data.education_details.ug_program || "",
+          ug_branch: data.form_data.education_details.ug_branch || "",
+          ug_college: data.form_data.education_details.ug_college || "",
+          ug_university: data.form_data.education_details.ug_university || "",
+          ug_arrear_history: data.form_data.education_details.ug_arrear_history || "",
+          ug_current_arrear: data.form_data.education_details.ug_current_arrear || "",
+          ug_education_type: data.form_data.education_details.ug_education_type || "",
+          ug_marksheet_path: data.form_data.education_details.ug_marksheet_path || "",
+
+
+          pg_studied: data.form_data.education_details.pg_studied || undefined,
+          pg_year: parseInt(data.form_data.education_details.pg_year) || 0,
+          pg_percentage: data.form_data.education_details.pg_percentage || 0,
+          pg_program: data.form_data.education_details.pg_program || "",
+          pg_branch: data.form_data.education_details.pg_branch || "",
+          pg_college: data.form_data.education_details.pg_college || "",
+          pg_university: data.form_data.education_details.pg_university || "",
+          pg_arrear_history: data.form_data.education_details.pg_arrear_history || "",
+          pg_current_arrear: data.form_data.education_details.pg_current_arrear || "",
+          pg_education_type: data.form_data.education_details.pg_education_type || undefined,
+          pg_marksheet_path: data.form_data.education_details.pg_marksheet_path || "",
+        },
+      });
+      form.setValue("student_experience_skill", {
+        experiences: data.form_data.experiences || [],
+        internships: data.form_data.internships || [],
+        skills: data.form_data.skills || [],
+        languages: data.form_data.languages || [],
+      });
+      form.setValue("student_photos_signature", {
+        photo: data.form_data.photos_signature.photo || "",
+        signature: data.form_data.photos_signature.signature || "",
+      });
+      form.setValue("student_terms_and_conditions", {
+        accept: data.form_data.student_terms_and_conditions.accept || undefined,
+      });
+      setCurrentStep(data.step == 5 ? 5 : data.step + 1);
+      if (data.step >= 0) {
+        setCompletedSteps(Array.from({ length: data.step == 5 ? 5 : data.step + 1 }, (_, i) => i));
+      }
+    }
+  }, [data]);
+
+
+  console.log(data)
+
+
+  const response = api.put(`${routes.students.form.put}?step=${currentStep}`);
+  const saveStepData = async (formData: FormData) => {
+    try {
+      const payloadData = generatePayload(formData);
+      response.mutate(payloadData, {
+        onSuccess: () => {
+          console.log("Step data saved successfully");
+          toast.success("Step data saved successfully");
+        },
+        onError: (error: any) => {
+          console.error("Error saving step data:", error);
+          toast.error(
+            `Failed to save step data: ${error?.message || "Unknown error"}`
+          );
+        },
+      });
+      return { success: true };
+    } catch (error: any) {
+      console.error("Error saving step data:", error);
+      return {
+        success: false,
+        error: error?.message || "Failed to save step data",
+      };
+    }
+  };
+
   const nextStep = async () => {
-    console.log(form.getValues());
     const fieldsToValidate = getFieldsToValidate(currentStep);
     const result = await form.trigger(fieldsToValidate as any);
 
     if (result) {
       console.log("Step", currentStep, "is valid");
+
+      // Save the current step's data
+      const formData = form.getValues();
+      const saveResult = await saveStepData(formData);
+
+      if (!saveResult.success) {
+        toast.error(`Failed to save step data: ${saveResult.error}`);
+        return;
+      }
+
       if (currentStep < steps.length - 1) {
         console.log("Moving to next step");
         setCompletedSteps((prev) =>
           prev.includes(currentStep) ? prev : [...prev, currentStep]
-        ); // Mark current step as completed
+        );
         setCurrentStep(currentStep + 1);
         window.scrollTo(0, 0);
       } else {
@@ -189,7 +320,7 @@ export function StudentRegistrationForm() {
         console.log("Submitting form");
       }
     } else {
-      console.log("Step--> else", currentStep, "is invalid");
+      console.log("Step", currentStep, "is invalid");
       console.log(form.formState.errors);
     }
   };
@@ -449,7 +580,7 @@ export function StudentRegistrationForm() {
                 STEP - {currentStep + 1} / {steps.length}
               </h3>
               <h2 className="hidden md:block text-2xl font-bold text-gray-800">
-                {steps[currentStep].label}
+                {steps[currentStep]?.label || "Invalid Step"}
               </h2>
             </div>
             <div className="container p-2 md:py-4 md:px-6 mx-auto">

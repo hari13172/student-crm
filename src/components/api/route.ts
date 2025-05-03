@@ -45,7 +45,11 @@ export const routes = {
   students: {
     get: `/api/students`,
     add_entity: `/api/students/add-entity`,
-
+    form: {
+      get: `/api/students/forms`,
+      put: `/api/students/forms`,
+    },
+  
     // training: `api//training`,
   },
   dropdown: {
