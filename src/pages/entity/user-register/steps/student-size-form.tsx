@@ -227,25 +227,6 @@ export function StudentSizeForm() {
           )}
         />
 
-        {(isUG || isPG) && (
-          <FormField
-            control={control}
-            name={`${prefix}.${isUG ? "ug_university" : "pg_university"}`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>University</FormLabel>
-                <Input
-                  type="text"
-                  placeholder="Enter university"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value)}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
         {(isClass10 || isClass12 || isDiploma) && (
           <FormField
             control={control}
